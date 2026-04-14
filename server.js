@@ -2,7 +2,7 @@ const http = require("http");
 const jwt = require("jsonwebtoken");
 const WebSocket = require("ws");
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const SECRET = "supersecret123";
 const clients = {};
 const server = http.createServer((req, res) => {
@@ -99,8 +99,8 @@ function getUsernameBySocket(targetSocket) {
   return null;
 }
 
-server.listen(PORT, () => {
-  console.log(`Server HTTP si WebSocket pornit pe portul ${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log("Server pornit pe portul", PORT);
 });
 
 function sendJson(res, statusCode, data) {
