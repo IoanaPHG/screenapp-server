@@ -1,13 +1,36 @@
 {
   "name": "screenapp",
   "version": "1.0.0",
+  "description": "Screen sharing desktop app with WebRTC signaling",
   "private": true,
-  "main": "server.js",
+  "main": "electron/main.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "desktop": "electron .",
+    "dist": "electron-builder --win nsis",
+    "rebuild": "electron-rebuild"
   },
   "dependencies": {
+    "@nut-tree-fork/nut-js": "^4.2.6",
     "jsonwebtoken": "^9.0.2",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^35.1.5",
+    "electron-builder": "^24.13.3",
+    "electron-rebuild": "^3.2.9"
+  },
+  "build": {
+    "appId": "com.screenapp.desktop",
+    "productName": "ScreenApp",
+    "files": [
+      "electron/**/*",
+      "public/**/*",
+      "server.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    }
   }
 }

@@ -154,21 +154,23 @@
 <body>
   <main class="page">
     <h1>ScreenApp</h1>
-    <p class="subtitle">Ion partajeaza ecranul. Maria intra si vede stream-ul in browser.</p>
+    <p class="subtitle">Intri intr-o camera, vezi cine este online si alegi cui trimiti ecranul.</p>
 
     <section class="layout">
       <div class="panel">
         <label for="username">Username</label>
-        <input id="username" value="Ion" />
+        <input id="username" value="" placeholder="ex: ioana" />
 
-        <label for="targetUser">Target user</label>
-        <input id="targetUser" value="Maria" />
+        <label for="roomId">Camera</label>
+        <input id="roomId" value="sedinta-1" />
 
         <button id="connectButton">Connect</button>
         <button id="shareButton" class="secondary" disabled>Share Screen</button>
+        <button id="requestControlButton" class="secondary" disabled>Request Control</button>
 
         <p id="status" class="status">Neconectat</p>
-        <p class="hint">Pentru test: intr-un tab foloseste `Ion -> Maria`, iar in al doilea `Maria -> Ion`.</p>
+        <p class="hint">Selecteaza un participant online din lista si apoi apasa `Share Screen`.</p>
+        <div id="participants" class="logs">Participanti online</div>
       </div>
 
       <div class="panel videoWrap">
@@ -180,28 +182,43 @@
 
   <script>
     const usernameInput = document.getElementById("username");
-    const targetUserInput = document.getElementById("targetUser");
+    const roomIdInput = document.getElementById("roomId");
     const connectButton = document.getElementById("connectButton");
     const shareButton = document.getElementById("shareButton");
+    const requestControlButton = document.getElementById("requestControlButton");
     const statusText = document.getElementById("status");
     const screenVideo = document.getElementById("screenVideo");
     const logs = document.getElementById("logs");
+    const participantsBox = document.getElementById("participants");
 
     let ws = null;
     let pc = null;
     let localStream = null;
     let username = "";
+    let roomId = "";
     let targetUser = "";
+    let participants = [];
+    let controlTargetUser = "";
+    let acceptedControllerUser = "";
+    let hasControlPermission = false;
+    let remoteStreamActive = false;
+    let lastMouseSentAt = 0;
 
     connectButton.addEventListener("click", connect);
     shareButton.addEventListener("click", shareScreen);
+    requestControlButton.addEventListener("click", requestControl);
+    screenVideo.addEventListener("mousemove", forwardMouseEvent);
+    screenVideo.addEventListener("mousedown", forwardMouseEvent);
+    screenVideo.addEventListener("click", forwardMouseEvent);
+    window.addEventListener("keydown", forwardKeyboardEvent);
+    window.addEventListener("keyup", forwardKeyboardEvent);
 
     function connect() {
       username = usernameInput.value.trim();
-      targetUser = targetUserInput.value.trim();
+      roomId = roomIdInput.value.trim() || "main";
 
-      if (!username || !targetUser) {
-        setStatus("Completeaza username si target user.");
+      if (!username) {
+        setStatus("Completeaza username.");
         return;
       }
 
@@ -216,18 +233,21 @@
 
       ws.addEventListener("open", () => {
         setStatus(`Conectat ca ${username}`);
-        shareButton.disabled = username !== "Ion";
+        shareButton.disabled = true;
+        requestControlButton.disabled = true;
         logLine("WebSocket conectat.");
 
         ws.send(JSON.stringify({
           type: "join",
-          username
+          username,
+          roomId
         }));
       });
 
       ws.addEventListener("close", () => {
         setStatus("Conexiune inchisa");
         shareButton.disabled = true;
+        requestControlButton.disabled = true;
         logLine("WebSocket inchis.");
       });
 
@@ -246,9 +266,14 @@
             return;
           }
 
-          if (data.type === "offer" && username !== "Ion") {
+          if (data.type === "participants") {
+            participants = data.participants.filter((name) => name !== username);
+            renderParticipants();
+            return;
+          }
+
+          if (data.type === "offer") {
             targetUser = data.from;
-            targetUserInput.value = targetUser;
             pc = createPeerConnection();
 
             await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
@@ -274,6 +299,52 @@
 
           if (data.type === "ice" && data.candidate) {
             await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            return;
+          }
+
+          if (data.type === "control-request") {
+            const accepted = confirm(`${data.from} cere control remote. Permiti controlul?`);
+            acceptedControllerUser = accepted ? data.from : "";
+            ws.send(JSON.stringify({
+              type: accepted ? "control-granted" : "control-revoked",
+              to: data.from
+            }));
+            setStatus(
+              accepted
+                ? `Control acordat catre ${data.from}`
+                : `Control refuzat pentru ${data.from}`
+            );
+            return;
+          }
+
+          if (data.type === "control-granted") {
+            hasControlPermission = true;
+            controlTargetUser = data.from;
+            setStatus(`Control activ pentru ${data.from}`);
+            logLine("Control remote aprobat.");
+            return;
+          }
+
+          if (data.type === "control-revoked") {
+            hasControlPermission = false;
+            controlTargetUser = "";
+            acceptedControllerUser = "";
+            setStatus(`Control oprit de ${data.from}`);
+            logLine("Control remote oprit sau refuzat.");
+            return;
+          }
+
+          if (data.type === "remote-mouse") {
+            if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
+              await window.screenAppDesktop.executeRemoteMouse(data);
+            }
+            return;
+          }
+
+          if (data.type === "remote-keyboard") {
+            if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
+              await window.screenAppDesktop.executeRemoteKeyboard(data);
+            }
           }
         } catch (error) {
           logLine(`Eroare mesaj WebSocket: ${error.message}`);
@@ -282,13 +353,13 @@
     }
 
     async function shareScreen() {
-      if (username !== "Ion") {
-        setStatus("Doar Ion poate face share screen.");
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        setStatus("Conecteaza-te mai intai.");
         return;
       }
 
-      if (!ws || ws.readyState !== WebSocket.OPEN) {
-        setStatus("Conecteaza-te mai intai.");
+      if (!targetUser) {
+        setStatus("Alege mai intai un participant din camera.");
         return;
       }
 
@@ -316,21 +387,42 @@
         }));
 
         setStatus(`Share pornit pentru ${targetUser}`);
+        requestControlButton.disabled = true;
       } catch (error) {
         logLine(`Screen share esuat: ${error.message}`);
         setStatus("Nu s-a putut porni share screen.");
       }
     }
 
+    function requestControl() {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        setStatus("Conecteaza-te mai intai.");
+        return;
+      }
+
+      if (!targetUser) {
+        setStatus("Alege participantul pe care vrei sa il controlezi.");
+        return;
+      }
+
+      ws.send(JSON.stringify({
+        type: "control-request",
+        to: targetUser
+      }));
+
+      setStatus(`Cerere de control trimisa catre ${targetUser}`);
+      logLine("Cerere de control trimisa.");
+    }
+
     function createPeerConnection() {
       const peerConnection = new RTCPeerConnection();
 
       peerConnection.ontrack = (event) => {
-        if (username !== "Ion") {
-          screenVideo.srcObject = event.streams[0];
-          setStatus(`Stream primit de la ${targetUser}`);
-          logLine("Stream remote atasat in video.");
-        }
+        screenVideo.srcObject = event.streams[0];
+        setStatus(`Stream primit de la ${targetUser}`);
+        logLine("Stream remote atasat in video.");
+        remoteStreamActive = true;
+        requestControlButton.disabled = false;
       };
 
       peerConnection.onicecandidate = (event) => {
@@ -346,6 +438,85 @@
       };
 
       return peerConnection;
+    }
+
+    function renderParticipants() {
+      if (participants.length === 0) {
+        participantsBox.textContent = "Nu exista alti participanti online in aceasta camera.";
+        shareButton.disabled = true;
+        requestControlButton.disabled = true;
+        return;
+      }
+
+      participantsBox.innerHTML = "";
+
+      participants.forEach((name) => {
+        const button = document.createElement("button");
+        button.textContent = name === targetUser ? `${name} (selectat)` : name;
+        button.className = "secondary";
+        button.style.marginTop = "8px";
+        button.disabled = false;
+        button.addEventListener("click", () => {
+          targetUser = name;
+          hasControlPermission = false;
+          controlTargetUser = "";
+          shareButton.disabled = false;
+          requestControlButton.disabled = !remoteStreamActive;
+          setStatus(`Participant selectat: ${name}`);
+          renderParticipants();
+        });
+        participantsBox.appendChild(button);
+      });
+    }
+
+    function forwardMouseEvent(event) {
+      if (!hasControlPermission || !controlTargetUser || !remoteStreamActive) {
+        return;
+      }
+
+      if (event.type === "mousemove" && Date.now() - lastMouseSentAt < 30) {
+        return;
+      }
+
+      lastMouseSentAt = Date.now();
+
+      const rect = screenVideo.getBoundingClientRect();
+      const payload = {
+        type: "remote-mouse",
+        to: controlTargetUser,
+        eventType: event.type,
+        x: Math.round(event.clientX - rect.left),
+        y: Math.round(event.clientY - rect.top),
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        button: typeof event.button === "number" ? event.button : 0
+      };
+
+      ws.send(JSON.stringify(payload));
+    }
+
+    function forwardKeyboardEvent(event) {
+      if (!hasControlPermission || !controlTargetUser || !remoteStreamActive) {
+        return;
+      }
+
+      if (document.activeElement && ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+        return;
+      }
+
+      ws.send(JSON.stringify({
+        type: "remote-keyboard",
+        to: controlTargetUser,
+        eventType: event.type,
+        key: event.key,
+        code: event.code,
+        altKey: event.altKey,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        metaKey: event.metaKey
+      }));
+
+      event.preventDefault();
     }
 
     function setStatus(message) {

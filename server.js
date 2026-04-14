@@ -71,19 +71,37 @@ wss.on("connection", (ws) => {
     }
 
     if (data.type === "join" && data.username) {
-      clients[data.username] = ws;
+      const roomId = data.roomId || "main";
+      const existingClient = clients[data.username];
+
+      if (existingClient && existingClient.roomId !== roomId) {
+        broadcastParticipants(existingClient.roomId);
+      }
+
+      clients[data.username] = {
+        ws,
+        roomId
+      };
+
+      broadcastParticipants(roomId);
       return;
     }
 
     if (data.type === "message" && data.to && data.text) {
+      const sender = getClientBySocket(ws);
       const recipient = clients[data.to];
 
-      if (!recipient || recipient.readyState !== WebSocket.OPEN) {
+      if (
+        !sender ||
+        !recipient ||
+        recipient.roomId !== sender.roomId ||
+        recipient.ws.readyState !== WebSocket.OPEN
+      ) {
         ws.send(JSON.stringify({ error: "Utilizatorul nu exista" }));
         return;
       }
 
-      recipient.send(
+      recipient.ws.send(
         JSON.stringify({
           from: getUsernameBySocket(ws),
           text: data.text
@@ -95,16 +113,27 @@ wss.on("connection", (ws) => {
     if (
       (data.type === "offer" && data.to && data.offer) ||
       (data.type === "answer" && data.to && data.answer) ||
-      (data.type === "ice" && data.to && data.candidate)
+      (data.type === "ice" && data.to && data.candidate) ||
+      (data.type === "control-request" && data.to) ||
+      (data.type === "control-granted" && data.to) ||
+      (data.type === "control-revoked" && data.to) ||
+      (data.type === "remote-mouse" && data.to) ||
+      (data.type === "remote-keyboard" && data.to)
     ) {
+      const sender = getClientBySocket(ws);
       const recipient = clients[data.to];
 
-      if (!recipient || recipient.readyState !== WebSocket.OPEN) {
+      if (
+        !sender ||
+        !recipient ||
+        recipient.roomId !== sender.roomId ||
+        recipient.ws.readyState !== WebSocket.OPEN
+      ) {
         ws.send(JSON.stringify({ error: "Utilizatorul nu exista" }));
         return;
       }
 
-      recipient.send(
+      recipient.ws.send(
         JSON.stringify({
           ...data,
           from: getUsernameBySocket(ws)
@@ -120,19 +149,48 @@ wss.on("connection", (ws) => {
     const username = getUsernameBySocket(ws);
 
     if (username) {
+      const roomId = clients[username].roomId;
       delete clients[username];
+      broadcastParticipants(roomId);
     }
   });
 });
 
 function getUsernameBySocket(targetSocket) {
   for (const username in clients) {
-    if (clients[username] === targetSocket) {
+    if (clients[username].ws === targetSocket) {
       return username;
     }
   }
 
   return null;
+}
+
+function getClientBySocket(targetSocket) {
+  const username = getUsernameBySocket(targetSocket);
+
+  if (!username) {
+    return null;
+  }
+
+  return clients[username];
+}
+
+function broadcastParticipants(roomId) {
+  const participants = Object.keys(clients).filter((username) => {
+    const client = clients[username];
+    return client.roomId === roomId && client.ws.readyState === WebSocket.OPEN;
+  });
+
+  participants.forEach((username) => {
+    clients[username].ws.send(
+      JSON.stringify({
+        type: "participants",
+        roomId,
+        participants
+      })
+    );
+  });
 }
 
 server.listen(PORT, "0.0.0.0", () => {
