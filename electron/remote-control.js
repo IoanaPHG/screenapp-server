@@ -50,7 +50,7 @@ async function executeRemoteMouse(payload) {
     await mouse.click(toMouseButton(payload.button));
   }
 
-  return { ok: true, simulated: true };
+  return { ok: true, simulated: true, action: payload.eventType, point };
 }
 
 async function executeRemoteKeyboard(payload) {
@@ -58,25 +58,25 @@ async function executeRemoteKeyboard(payload) {
 
   if (!key && payload.eventType === "keydown" && isPrintableKey(payload.key)) {
     await keyboard.type(payload.key);
-    return { ok: true, simulated: true };
+    return { ok: true, simulated: true, action: `type:${payload.key}` };
   }
 
   if (!key) {
-    return { ok: false, simulated: false };
+    return { ok: false, simulated: false, action: "ignored" };
   }
 
   if (payload.eventType === "keyup") {
     await keyboard.releaseKey(key);
-    return { ok: true, simulated: true };
+    return { ok: true, simulated: true, action: `release:${payload.key}` };
   }
 
   if (isModifierKey(payload.key)) {
     await keyboard.pressKey(key);
-    return { ok: true, simulated: true };
+    return { ok: true, simulated: true, action: `press:${payload.key}` };
   }
 
   await keyboard.type(key);
-  return { ok: true, simulated: true };
+  return { ok: true, simulated: true, action: `type:${payload.key}` };
 }
 
 function toScreenPoint(payload) {

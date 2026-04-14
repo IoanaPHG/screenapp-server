@@ -181,6 +181,22 @@
       font-size: 14px;
     }
 
+    .modeBadge {
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .modeBadge.web {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
     .screen {
       background: #0f172a;
       border-radius: 16px;
@@ -221,6 +237,31 @@
       min-height: 110px;
     }
 
+    .logGrid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .logTitle {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .notice {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fff7ed;
+      color: var(--accent-dark);
+      font-size: 13px;
+      border: 1px solid #fed7aa;
+    }
+
     @media (max-width: 980px) {
       .app {
         grid-template-columns: 1fr;
@@ -233,6 +274,10 @@
 
       .screen {
         min-height: 300px;
+      }
+
+      .logGrid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -258,6 +303,7 @@
       </label>
 
       <div id="status" class="status">Not connected</div>
+      <div id="desktopNotice" class="notice">Remote control works best in the Electron desktop app.</div>
 
       <div class="sectionTitle">Online Now</div>
       <div id="participants" class="participants">
@@ -271,6 +317,7 @@
           <div class="topbarTitle">Remote Screen</div>
           <div id="viewerMeta" class="topbarMeta">Select a participant and start sharing.</div>
         </div>
+        <div id="modeBadge" class="modeBadge">Desktop</div>
       </div>
 
       <div class="screen">
@@ -278,7 +325,16 @@
         <div id="placeholder" class="placeholder">Waiting for screen share...</div>
       </div>
 
-      <div id="logs" class="logs">Activity log</div>
+      <div class="logGrid">
+        <div class="logs">
+          <div class="logTitle">App Log</div>
+          <div id="logs">Activity log</div>
+        </div>
+        <div class="logs">
+          <div class="logTitle">Control Pipeline</div>
+          <div id="controlLogs">Waiting for Electron control logs...</div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -291,9 +347,13 @@
     const statusText = document.getElementById("status");
     const screenVideo = document.getElementById("screenVideo");
     const logs = document.getElementById("logs");
+    const controlLogs = document.getElementById("controlLogs");
     const participantsBox = document.getElementById("participants");
     const viewerMeta = document.getElementById("viewerMeta");
     const placeholder = document.getElementById("placeholder");
+    const modeBadge = document.getElementById("modeBadge");
+    const desktopNotice = document.getElementById("desktopNotice");
+    const isDesktopApp = Boolean(window.screenAppDesktop?.isElectronDesktop);
 
     let ws = null;
     let pc = null;
@@ -308,6 +368,22 @@
     let allowRemoteControl = false;
     let remoteStreamActive = false;
     let lastMouseSentAt = 0;
+
+    if (isDesktopApp) {
+      modeBadge.textContent = "Desktop";
+      desktopNotice.textContent = "Desktop mode active. Remote control is enabled here.";
+    } else {
+      modeBadge.textContent = "Web";
+      modeBadge.classList.add("web");
+      allowRemoteControlCheckbox.disabled = true;
+      desktopNotice.textContent = "Web mode is viewer-first. Run the Electron app for real remote control.";
+    }
+
+    if (window.screenAppDesktop?.onDesktopLog) {
+      window.screenAppDesktop.onDesktopLog((message) => {
+        logControlLine(`DESKTOP ${message}`);
+      });
+    }
 
     connectButton.addEventListener("click", connect);
     shareButton.addEventListener("click", shareScreen);
@@ -339,6 +415,7 @@
       ws.addEventListener("open", () => {
         setStatus(`Connected as ${username}`);
         logLine("WebSocket connected.");
+        logControlLine(`PIPELINE Join room ${roomId} as ${username}`);
 
         ws.send(JSON.stringify({
           type: "join",
@@ -351,11 +428,13 @@
         setStatus("Connection closed");
         shareButton.disabled = true;
         logLine("WebSocket closed.");
+        logControlLine("PIPELINE WebSocket closed");
       });
 
       ws.addEventListener("error", () => {
         setStatus("WebSocket error");
         logLine("WebSocket error.");
+        logControlLine("PIPELINE WebSocket error");
       });
 
       ws.onmessage = async (event) => {
@@ -380,6 +459,7 @@
             acceptedControllerUser = data.allowRemoteControl ? data.from : "";
 
             await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+            logControlLine(`SIGNAL offer from ${data.from}`);
 
             const answer = await pc.createAnswer();
             await pc.setLocalDescription(answer);
@@ -392,17 +472,20 @@
 
             setStatus(`Connected to ${data.from}`);
             viewerMeta.textContent = `Viewing ${data.from}`;
+            logControlLine(`SIGNAL answer sent to ${data.from}`);
             return;
           }
 
           if (data.type === "answer") {
             await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
             setStatus(`Viewer connected: ${data.from}`);
+            logControlLine(`SIGNAL answer received from ${data.from}`);
             return;
           }
 
           if (data.type === "ice" && data.candidate) {
             await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            logControlLine(`SIGNAL ice from ${data.from}`);
             return;
           }
 
@@ -410,6 +493,7 @@
             hasControlPermission = true;
             controlTargetUser = data.from;
             setStatus(`Control active for ${data.from}`);
+            logControlLine(`CONTROL granted by ${data.from}`);
             return;
           }
 
@@ -418,11 +502,13 @@
             controlTargetUser = "";
             acceptedControllerUser = "";
             setStatus(`Control stopped by ${data.from}`);
+            logControlLine(`CONTROL revoked by ${data.from}`);
             return;
           }
 
           if (data.type === "remote-mouse") {
             if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
+              logControlLine(`REMOTE mouse from ${data.from}`);
               await window.screenAppDesktop.executeRemoteMouse(data);
             }
             return;
@@ -430,6 +516,7 @@
 
           if (data.type === "remote-keyboard") {
             if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
+              logControlLine(`REMOTE keyboard from ${data.from} -> ${data.key}`);
               await window.screenAppDesktop.executeRemoteKeyboard(data);
             }
           }
@@ -453,6 +540,7 @@
       allowRemoteControl = allowRemoteControlCheckbox.checked;
 
       try {
+        logControlLine(`PIPELINE share start to ${targetUser}`);
         localStream = await navigator.mediaDevices.getDisplayMedia({
           video: true
         });
@@ -474,6 +562,7 @@
           offer,
           allowRemoteControl
         }));
+        logControlLine(`SIGNAL offer sent to ${targetUser}`);
 
         setStatus(
           allowRemoteControl
@@ -484,10 +573,12 @@
         if (allowRemoteControl) {
           hasControlPermission = true;
           controlTargetUser = targetUser;
+          logControlLine(`CONTROL auto-enabled for ${targetUser}`);
         }
       } catch (error) {
         logLine(`Share failed: ${error.message}`);
         setStatus("Screen share failed.");
+        logControlLine(`PIPELINE share failed: ${error.message}`);
       }
     }
 
@@ -500,6 +591,7 @@
         viewerMeta.textContent = `Viewing ${targetUser}`;
         setStatus(`Stream from ${targetUser}`);
         remoteStreamActive = true;
+        logControlLine(`PIPELINE remote stream attached from ${targetUser}`);
       };
 
       peerConnection.onicecandidate = (event) => {
@@ -512,6 +604,7 @@
           to: targetUser,
           candidate: event.candidate
         }));
+        logControlLine(`SIGNAL ice sent to ${targetUser}`);
       };
 
       return peerConnection;
@@ -565,6 +658,7 @@
         height: Math.round(rect.height),
         button: typeof event.button === "number" ? event.button : 0
       }));
+      logControlLine(`SEND mouse ${event.type} -> ${controlTargetUser}`);
     }
 
     function forwardKeyboardEvent(event) {
@@ -587,6 +681,7 @@
         shiftKey: event.shiftKey,
         metaKey: event.metaKey
       }));
+      logControlLine(`SEND keyboard ${event.type} -> ${event.key}`);
 
       event.preventDefault();
     }
@@ -598,6 +693,11 @@
     function logLine(message) {
       const time = new Date().toLocaleTimeString();
       logs.textContent = `[${time}] ${message}\n` + logs.textContent;
+    }
+
+    function logControlLine(message) {
+      const time = new Date().toLocaleTimeString();
+      controlLogs.textContent = `[${time}] ${message}\n` + controlLogs.textContent;
     }
   </script>
 </body>
