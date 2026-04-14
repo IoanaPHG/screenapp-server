@@ -166,7 +166,10 @@
 
         <button id="connectButton">Connect</button>
         <button id="shareButton" class="secondary" disabled>Share Screen</button>
-        <button id="requestControlButton" class="secondary" disabled>Request Control</button>
+        <label for="allowRemoteControl">
+          <input id="allowRemoteControl" type="checkbox" />
+          Allow remote control
+        </label>
 
         <p id="status" class="status">Neconectat</p>
         <p class="hint">Selecteaza un participant online din lista si apoi apasa `Share Screen`.</p>
@@ -185,7 +188,7 @@
     const roomIdInput = document.getElementById("roomId");
     const connectButton = document.getElementById("connectButton");
     const shareButton = document.getElementById("shareButton");
-    const requestControlButton = document.getElementById("requestControlButton");
+    const allowRemoteControlCheckbox = document.getElementById("allowRemoteControl");
     const statusText = document.getElementById("status");
     const screenVideo = document.getElementById("screenVideo");
     const logs = document.getElementById("logs");
@@ -201,12 +204,12 @@
     let controlTargetUser = "";
     let acceptedControllerUser = "";
     let hasControlPermission = false;
+    let allowRemoteControl = false;
     let remoteStreamActive = false;
     let lastMouseSentAt = 0;
 
     connectButton.addEventListener("click", connect);
     shareButton.addEventListener("click", shareScreen);
-    requestControlButton.addEventListener("click", requestControl);
     screenVideo.addEventListener("mousemove", forwardMouseEvent);
     screenVideo.addEventListener("mousedown", forwardMouseEvent);
     screenVideo.addEventListener("click", forwardMouseEvent);
@@ -216,6 +219,7 @@
     function connect() {
       username = usernameInput.value.trim();
       roomId = roomIdInput.value.trim() || "main";
+      allowRemoteControl = allowRemoteControlCheckbox.checked;
 
       if (!username) {
         setStatus("Completeaza username.");
@@ -234,7 +238,6 @@
       ws.addEventListener("open", () => {
         setStatus(`Conectat ca ${username}`);
         shareButton.disabled = true;
-        requestControlButton.disabled = true;
         logLine("WebSocket conectat.");
 
         ws.send(JSON.stringify({
@@ -247,7 +250,6 @@
       ws.addEventListener("close", () => {
         setStatus("Conexiune inchisa");
         shareButton.disabled = true;
-        requestControlButton.disabled = true;
         logLine("WebSocket inchis.");
       });
 
@@ -275,6 +277,7 @@
           if (data.type === "offer") {
             targetUser = data.from;
             pc = createPeerConnection();
+            acceptedControllerUser = data.allowRemoteControl ? data.from : "";
 
             await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
 
@@ -299,21 +302,6 @@
 
           if (data.type === "ice" && data.candidate) {
             await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-            return;
-          }
-
-          if (data.type === "control-request") {
-            const accepted = confirm(`${data.from} cere control remote. Permiti controlul?`);
-            acceptedControllerUser = accepted ? data.from : "";
-            ws.send(JSON.stringify({
-              type: accepted ? "control-granted" : "control-revoked",
-              to: data.from
-            }));
-            setStatus(
-              accepted
-                ? `Control acordat catre ${data.from}`
-                : `Control refuzat pentru ${data.from}`
-            );
             return;
           }
 
@@ -383,35 +371,21 @@
         ws.send(JSON.stringify({
           type: "offer",
           to: targetUser,
-          offer
+          offer,
+          allowRemoteControl
         }));
 
         setStatus(`Share pornit pentru ${targetUser}`);
-        requestControlButton.disabled = true;
+
+        if (allowRemoteControl) {
+          hasControlPermission = true;
+          controlTargetUser = targetUser;
+          setStatus(`Share pornit pentru ${targetUser} cu control activ`);
+        }
       } catch (error) {
         logLine(`Screen share esuat: ${error.message}`);
         setStatus("Nu s-a putut porni share screen.");
       }
-    }
-
-    function requestControl() {
-      if (!ws || ws.readyState !== WebSocket.OPEN) {
-        setStatus("Conecteaza-te mai intai.");
-        return;
-      }
-
-      if (!targetUser) {
-        setStatus("Alege participantul pe care vrei sa il controlezi.");
-        return;
-      }
-
-      ws.send(JSON.stringify({
-        type: "control-request",
-        to: targetUser
-      }));
-
-      setStatus(`Cerere de control trimisa catre ${targetUser}`);
-      logLine("Cerere de control trimisa.");
     }
 
     function createPeerConnection() {
@@ -422,7 +396,6 @@
         setStatus(`Stream primit de la ${targetUser}`);
         logLine("Stream remote atasat in video.");
         remoteStreamActive = true;
-        requestControlButton.disabled = false;
       };
 
       peerConnection.onicecandidate = (event) => {
@@ -444,7 +417,6 @@
       if (participants.length === 0) {
         participantsBox.textContent = "Nu exista alti participanti online in aceasta camera.";
         shareButton.disabled = true;
-        requestControlButton.disabled = true;
         return;
       }
 
@@ -461,7 +433,6 @@
           hasControlPermission = false;
           controlTargetUser = "";
           shareButton.disabled = false;
-          requestControlButton.disabled = !remoteStreamActive;
           setStatus(`Participant selectat: ${name}`);
           renderParticipants();
         });
