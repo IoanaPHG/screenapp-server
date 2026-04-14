@@ -1,11 +1,26 @@
 const http = require("http");
+const fs = require("fs");
 const jwt = require("jsonwebtoken");
+const path = require("path");
 const WebSocket = require("ws");
 
 const PORT = process.env.PORT || 3001;
 const SECRET = "supersecret123";
+const INDEX_FILE = path.join(__dirname, "public", "index.html");
 const clients = {};
 const server = http.createServer((req, res) => {
+  if (req.method === "GET" && (req.url === "/" || req.url === "/index.html")) {
+    try {
+      const html = fs.readFileSync(INDEX_FILE, "utf8");
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      res.end(html);
+    } catch (error) {
+      sendJson(res, 500, { error: "Nu s-a putut incarca aplicatia" });
+    }
+
+    return;
+  }
+
   if (req.method === "POST" && req.url === "/api/token") {
     let body = "";
 
@@ -89,7 +104,12 @@ wss.on("connection", (ws) => {
         return;
       }
 
-      recipient.send(JSON.stringify(data));
+      recipient.send(
+        JSON.stringify({
+          ...data,
+          from: getUsernameBySocket(ws)
+        })
+      );
       return;
     }
 

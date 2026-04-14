@@ -35,18 +35,72 @@
   <script>
     const shareScreenButton = document.getElementById("shareScreenButton");
     const screenVideo = document.getElementById("screenVideo");
-    const pc = new RTCPeerConnection();
+    const username = prompt("Username-ul tau:", "Ion") || "Ion";
+    const initialTargetUser = username === "Ion" ? "Maria" : "Ion";
+    let targetUser = prompt("Trimite catre:", initialTargetUser) || initialTargetUser;
+    const isSharer = username === "Ion";
     const ws = new WebSocket("wss://screenapp-server.onrender.com");
+    let pc = createPeerConnection();
+
+    if (!isSharer) {
+      shareScreenButton.style.display = "none";
+    }
 
     ws.addEventListener("open", () => {
       console.log("WebSocket conectat");
+      ws.send(JSON.stringify({
+        type: "join",
+        username
+      }));
     });
 
     ws.addEventListener("error", (error) => {
       console.error("Eroare WebSocket:", error);
     });
 
+    ws.onmessage = async (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        if (data.type === "offer") {
+          if (isSharer) {
+            return;
+          }
+
+          targetUser = data.from;
+          pc = createPeerConnection();
+
+          await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+
+          ws.send(JSON.stringify({
+            type: "answer",
+            to: data.from,
+            answer
+          }));
+          return;
+        }
+
+        if (data.type === "answer") {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+          return;
+        }
+
+        if (data.type === "ice" && data.candidate) {
+          await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+      } catch (error) {
+        console.error("Eroare la procesarea mesajului WebSocket:", error);
+      }
+    };
+
     shareScreenButton.addEventListener("click", async () => {
+      if (!isSharer) {
+        return;
+      }
+
       try {
         const stream = await navigator.mediaDevices.getDisplayMedia({
           video: true
@@ -63,13 +117,35 @@
 
         ws.send(JSON.stringify({
           type: "offer",
-          to: "Maria",
+          to: targetUser,
           offer
         }));
       } catch (error) {
         console.error("Nu s-a putut porni screen sharing:", error);
       }
     });
+
+    function createPeerConnection() {
+      const peerConnection = new RTCPeerConnection();
+
+      peerConnection.ontrack = (event) => {
+        screenVideo.srcObject = event.streams[0];
+      };
+
+      peerConnection.onicecandidate = (event) => {
+        if (!event.candidate || !targetUser || ws.readyState !== WebSocket.OPEN) {
+          return;
+        }
+
+        ws.send(JSON.stringify({
+          type: "ice",
+          to: targetUser,
+          candidate: event.candidate
+        }));
+      };
+
+      return peerConnection;
+    }
   </script>
 </body>
 </html>
