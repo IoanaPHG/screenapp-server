@@ -6,14 +6,16 @@
   <title>ScreenApp</title>
   <style>
     :root {
-      --bg: #f4efe6;
-      --panel: #fffdf8;
-      --text: #1f1a14;
-      --muted: #6d6257;
-      --line: #d8cfc3;
-      --accent: #c96c3a;
-      --accent-dark: #9f4b1f;
-      --success: #2f855a;
+      --bg: #f3f4f6;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --accent: #ea580c;
+      --accent-dark: #c2410c;
+      --success: #15803d;
+      --danger: #b91c1c;
     }
 
     * {
@@ -22,164 +24,261 @@
 
     body {
       margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: var(--bg);
       color: var(--text);
-      background:
-        radial-gradient(circle at top left, #f8d8bf 0, transparent 28%),
-        linear-gradient(135deg, #efe3d3, var(--bg));
+    }
+
+    .app {
       min-height: 100vh;
-    }
-
-    .page {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 32px 20px 48px;
-    }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(32px, 5vw, 56px);
-      line-height: 1;
-    }
-
-    .subtitle {
-      margin: 0 0 24px;
-      color: var(--muted);
-      font-size: 18px;
-    }
-
-    .layout {
       display: grid;
-      gap: 20px;
       grid-template-columns: 320px 1fr;
-      align-items: start;
     }
 
-    .panel {
-      background: rgba(255, 253, 248, 0.92);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 12px 30px rgba(60, 38, 18, 0.08);
-      backdrop-filter: blur(4px);
+    .sidebar {
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      padding: 20px;
+    }
+
+    .brand {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .sectionTitle {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 18px 0 10px;
     }
 
     label {
       display: block;
-      font-size: 14px;
+      font-size: 13px;
       color: var(--muted);
       margin-bottom: 6px;
     }
 
     input {
       width: 100%;
-      padding: 12px 14px;
-      margin-bottom: 14px;
+      padding: 12px;
       border: 1px solid var(--line);
-      border-radius: 12px;
-      font: inherit;
+      border-radius: 10px;
       background: #fff;
+      font: inherit;
+      margin-bottom: 12px;
     }
 
     button {
       width: 100%;
       border: 0;
-      border-radius: 999px;
-      padding: 13px 16px;
+      border-radius: 10px;
+      padding: 12px 14px;
       font: inherit;
+      font-weight: 600;
       cursor: pointer;
-      color: white;
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     }
 
-    button[disabled] {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .primary {
+      background: var(--accent);
+      color: #fff;
     }
 
     .secondary {
+      background: #111827;
+      color: #fff;
       margin-top: 10px;
+    }
+
+    button[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      margin-top: 12px;
       color: var(--text);
-      background: #efe3d3;
+    }
+
+    .toggle input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
     }
 
     .status {
-      margin: 14px 0 0;
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #ecfdf5;
       color: var(--success);
-      min-height: 22px;
+      font-size: 14px;
+      min-height: 42px;
+    }
+
+    .participants {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .participant {
+      text-align: left;
+      background: var(--panel-soft);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .participant.active {
+      border-color: var(--accent);
+      background: #fff7ed;
+      color: var(--accent-dark);
+    }
+
+    .empty {
+      padding: 12px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      background: var(--panel-soft);
+    }
+
+    .main {
+      padding: 20px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+
+    .topbarTitle {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .topbarMeta {
+      color: var(--muted);
       font-size: 14px;
     }
 
-    .videoWrap {
+    .screen {
+      background: #0f172a;
+      border-radius: 16px;
       overflow: hidden;
-      min-height: 420px;
+      min-height: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
 
     video {
-      display: block;
       width: 100%;
-      min-height: 420px;
-      background: #111;
-      border-radius: 14px;
+      height: 100%;
+      object-fit: contain;
+      background: #111827;
+    }
+
+    .placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #cbd5e1;
+      font-size: 18px;
+      pointer-events: none;
     }
 
     .logs {
-      margin-top: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
       padding: 12px;
-      border-radius: 12px;
-      background: #f7f1e8;
       color: var(--muted);
       font-size: 13px;
       white-space: pre-wrap;
-      min-height: 120px;
+      min-height: 110px;
     }
 
-    .hint {
-      margin-top: 12px;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    @media (max-width: 860px) {
-      .layout {
+    @media (max-width: 980px) {
+      .app {
         grid-template-columns: 1fr;
       }
 
-      video {
-        min-height: 260px;
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .screen {
+        min-height: 300px;
       }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <h1>ScreenApp</h1>
-    <p class="subtitle">Intri intr-o camera, vezi cine este online si alegi cui trimiti ecranul.</p>
+  <main class="app">
+    <aside class="sidebar">
+      <div class="brand">ScreenApp</div>
 
-    <section class="layout">
-      <div class="panel">
-        <label for="username">Username</label>
-        <input id="username" value="" placeholder="ex: ioana" />
+      <div class="sectionTitle">Your Session</div>
+      <label for="username">Your name</label>
+      <input id="username" placeholder="ex: ioana" />
 
-        <label for="roomId">Camera</label>
-        <input id="roomId" value="sedinta-1" />
+      <label for="roomId">Room</label>
+      <input id="roomId" value="sedinta-1" />
 
-        <button id="connectButton">Connect</button>
-        <button id="shareButton" class="secondary" disabled>Share Screen</button>
-        <label for="allowRemoteControl">
-          <input id="allowRemoteControl" type="checkbox" />
-          Allow remote control
-        </label>
+      <button id="connectButton" class="primary">Connect</button>
+      <button id="shareButton" class="secondary" disabled>Share Screen</button>
 
-        <p id="status" class="status">Neconectat</p>
-        <p class="hint">Selecteaza un participant online din lista si apoi apasa `Share Screen`.</p>
-        <div id="participants" class="logs">Participanti online</div>
+      <label class="toggle" for="allowRemoteControl">
+        <input id="allowRemoteControl" type="checkbox" />
+        <span>Allow remote control</span>
+      </label>
+
+      <div id="status" class="status">Not connected</div>
+
+      <div class="sectionTitle">Online Now</div>
+      <div id="participants" class="participants">
+        <div class="empty">No one else is in this room yet.</div>
+      </div>
+    </aside>
+
+    <section class="main">
+      <div class="topbar">
+        <div>
+          <div class="topbarTitle">Remote Screen</div>
+          <div id="viewerMeta" class="topbarMeta">Select a participant and start sharing.</div>
+        </div>
       </div>
 
-      <div class="panel videoWrap">
+      <div class="screen">
         <video id="screenVideo" autoplay playsinline muted></video>
-        <div id="logs" class="logs">Jurnal aplicatie</div>
+        <div id="placeholder" class="placeholder">Waiting for screen share...</div>
       </div>
+
+      <div id="logs" class="logs">Activity log</div>
     </section>
   </main>
 
@@ -193,6 +292,8 @@
     const screenVideo = document.getElementById("screenVideo");
     const logs = document.getElementById("logs");
     const participantsBox = document.getElementById("participants");
+    const viewerMeta = document.getElementById("viewerMeta");
+    const placeholder = document.getElementById("placeholder");
 
     let ws = null;
     let pc = null;
@@ -222,12 +323,12 @@
       allowRemoteControl = allowRemoteControlCheckbox.checked;
 
       if (!username) {
-        setStatus("Completeaza username.");
+        setStatus("Enter your name.");
         return;
       }
 
       if (ws && ws.readyState === WebSocket.OPEN) {
-        logLine("WebSocket deja conectat.");
+        logLine("Already connected.");
         return;
       }
 
@@ -236,9 +337,8 @@
       pc = createPeerConnection();
 
       ws.addEventListener("open", () => {
-        setStatus(`Conectat ca ${username}`);
-        shareButton.disabled = true;
-        logLine("WebSocket conectat.");
+        setStatus(`Connected as ${username}`);
+        logLine("WebSocket connected.");
 
         ws.send(JSON.stringify({
           type: "join",
@@ -248,20 +348,20 @@
       });
 
       ws.addEventListener("close", () => {
-        setStatus("Conexiune inchisa");
+        setStatus("Connection closed");
         shareButton.disabled = true;
-        logLine("WebSocket inchis.");
+        logLine("WebSocket closed.");
       });
 
       ws.addEventListener("error", () => {
-        setStatus("Eroare WebSocket");
-        logLine("A aparut o eroare WebSocket.");
+        setStatus("WebSocket error");
+        logLine("WebSocket error.");
       });
 
       ws.onmessage = async (event) => {
         try {
           const data = JSON.parse(event.data);
-          logLine(`Mesaj primit: ${data.type}`);
+          logLine(`Received: ${data.type}`);
 
           if (data.error) {
             setStatus(data.error);
@@ -290,13 +390,14 @@
               answer
             }));
 
-            setStatus(`Answer trimis catre ${data.from}`);
+            setStatus(`Connected to ${data.from}`);
+            viewerMeta.textContent = `Viewing ${data.from}`;
             return;
           }
 
           if (data.type === "answer") {
             await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-            setStatus(`Answer primit de la ${data.from}`);
+            setStatus(`Viewer connected: ${data.from}`);
             return;
           }
 
@@ -308,8 +409,7 @@
           if (data.type === "control-granted") {
             hasControlPermission = true;
             controlTargetUser = data.from;
-            setStatus(`Control activ pentru ${data.from}`);
-            logLine("Control remote aprobat.");
+            setStatus(`Control active for ${data.from}`);
             return;
           }
 
@@ -317,8 +417,7 @@
             hasControlPermission = false;
             controlTargetUser = "";
             acceptedControllerUser = "";
-            setStatus(`Control oprit de ${data.from}`);
-            logLine("Control remote oprit sau refuzat.");
+            setStatus(`Control stopped by ${data.from}`);
             return;
           }
 
@@ -335,21 +434,23 @@
             }
           }
         } catch (error) {
-          logLine(`Eroare mesaj WebSocket: ${error.message}`);
+          logLine(`Error: ${error.message}`);
         }
       };
     }
 
     async function shareScreen() {
       if (!ws || ws.readyState !== WebSocket.OPEN) {
-        setStatus("Conecteaza-te mai intai.");
+        setStatus("Connect first.");
         return;
       }
 
       if (!targetUser) {
-        setStatus("Alege mai intai un participant din camera.");
+        setStatus("Select a participant first.");
         return;
       }
+
+      allowRemoteControl = allowRemoteControlCheckbox.checked;
 
       try {
         localStream = await navigator.mediaDevices.getDisplayMedia({
@@ -357,6 +458,8 @@
         });
 
         screenVideo.srcObject = localStream;
+        placeholder.style.display = "none";
+        viewerMeta.textContent = `Sharing to ${targetUser}`;
 
         localStream.getTracks().forEach((track) => {
           pc.addTrack(track, localStream);
@@ -365,9 +468,6 @@
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
 
-        console.log(JSON.stringify(offer));
-        logLine("Offer generat si trimis.");
-
         ws.send(JSON.stringify({
           type: "offer",
           to: targetUser,
@@ -375,16 +475,19 @@
           allowRemoteControl
         }));
 
-        setStatus(`Share pornit pentru ${targetUser}`);
+        setStatus(
+          allowRemoteControl
+            ? `Sharing to ${targetUser} with control`
+            : `Sharing to ${targetUser}`
+        );
 
         if (allowRemoteControl) {
           hasControlPermission = true;
           controlTargetUser = targetUser;
-          setStatus(`Share pornit pentru ${targetUser} cu control activ`);
         }
       } catch (error) {
-        logLine(`Screen share esuat: ${error.message}`);
-        setStatus("Nu s-a putut porni share screen.");
+        logLine(`Share failed: ${error.message}`);
+        setStatus("Screen share failed.");
       }
     }
 
@@ -393,8 +496,9 @@
 
       peerConnection.ontrack = (event) => {
         screenVideo.srcObject = event.streams[0];
-        setStatus(`Stream primit de la ${targetUser}`);
-        logLine("Stream remote atasat in video.");
+        placeholder.style.display = "none";
+        viewerMeta.textContent = `Viewing ${targetUser}`;
+        setStatus(`Stream from ${targetUser}`);
         remoteStreamActive = true;
       };
 
@@ -415,7 +519,7 @@
 
     function renderParticipants() {
       if (participants.length === 0) {
-        participantsBox.textContent = "Nu exista alti participanti online in aceasta camera.";
+        participantsBox.innerHTML = '<div class="empty">No one else is in this room yet.</div>';
         shareButton.disabled = true;
         return;
       }
@@ -424,16 +528,15 @@
 
       participants.forEach((name) => {
         const button = document.createElement("button");
-        button.textContent = name === targetUser ? `${name} (selectat)` : name;
-        button.className = "secondary";
-        button.style.marginTop = "8px";
-        button.disabled = false;
+        button.textContent = name;
+        button.className = name === targetUser ? "participant active" : "participant";
         button.addEventListener("click", () => {
           targetUser = name;
           hasControlPermission = false;
           controlTargetUser = "";
           shareButton.disabled = false;
-          setStatus(`Participant selectat: ${name}`);
+          setStatus(`Selected: ${name}`);
+          viewerMeta.textContent = `Ready for ${name}`;
           renderParticipants();
         });
         participantsBox.appendChild(button);
@@ -452,7 +555,7 @@
       lastMouseSentAt = Date.now();
 
       const rect = screenVideo.getBoundingClientRect();
-      const payload = {
+      ws.send(JSON.stringify({
         type: "remote-mouse",
         to: controlTargetUser,
         eventType: event.type,
@@ -461,9 +564,7 @@
         width: Math.round(rect.width),
         height: Math.round(rect.height),
         button: typeof event.button === "number" ? event.button : 0
-      };
-
-      ws.send(JSON.stringify(payload));
+      }));
     }
 
     function forwardKeyboardEvent(event) {
