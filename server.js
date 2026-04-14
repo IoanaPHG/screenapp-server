@@ -77,6 +77,22 @@ wss.on("connection", (ws) => {
       return;
     }
 
+    if (
+      (data.type === "offer" && data.to && data.offer) ||
+      (data.type === "answer" && data.to && data.answer) ||
+      (data.type === "ice" && data.to && data.candidate)
+    ) {
+      const recipient = clients[data.to];
+
+      if (!recipient || recipient.readyState !== WebSocket.OPEN) {
+        ws.send(JSON.stringify({ error: "Utilizatorul nu exista" }));
+        return;
+      }
+
+      recipient.send(JSON.stringify(data));
+      return;
+    }
+
     ws.send(JSON.stringify({ error: "Mesaj invalid" }));
   });
 
