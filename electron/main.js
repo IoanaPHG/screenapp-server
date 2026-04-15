@@ -1,11 +1,12 @@
 const { app, BrowserWindow, desktopCapturer, ipcMain, session, shell } = require("electron");
+const path = require("path");
 const {
   executeRemoteKeyboard,
   executeRemoteMouse,
   executeRemoteScroll
 } = require("./remote-control");
 
-const APP_URL = process.env.SCREENAPP_URL || "https://screenapp-server.onrender.com";
+const APP_ENTRY = path.join(__dirname, "..", "public", "index.html");
 const windows = new Set();
 
 function createWindow() {
@@ -19,7 +20,7 @@ function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      preload: require("path").join(__dirname, "preload.js")
+      preload: path.join(__dirname, "preload.js")
     }
   });
 
@@ -37,7 +38,7 @@ function createWindow() {
   });
 
   windows.add(mainWindow);
-  mainWindow.loadURL(APP_URL);
+  mainWindow.loadFile(APP_ENTRY);
 }
 
 app.whenReady().then(() => {

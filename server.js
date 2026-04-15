@@ -71,18 +71,48 @@ wss.on("connection", (ws) => {
     }
 
     if (data.type === "join" && data.username) {
+      const username = data.username.trim();
       const roomId = data.roomId || "main";
-      const existingClient = clients[data.username];
 
-      if (existingClient && existingClient.roomId !== roomId) {
-        broadcastParticipants(existingClient.roomId);
+      if (!username) {
+        ws.send(JSON.stringify({ error: "Username lipsa" }));
+        return;
       }
 
-      clients[data.username] = {
+      const currentUsername = getUsernameBySocket(ws);
+      const existingClient = clients[username];
+
+      if (
+        existingClient &&
+        existingClient.ws !== ws &&
+        existingClient.ws.readyState === WebSocket.OPEN
+      ) {
+        ws.send(JSON.stringify({
+          type: "join-error",
+          error: "Numele este deja folosit"
+        }));
+        return;
+      }
+
+      if (currentUsername && currentUsername !== username) {
+        const previousRoomId = clients[currentUsername]?.roomId;
+        delete clients[currentUsername];
+
+        if (previousRoomId) {
+          broadcastParticipants(previousRoomId);
+        }
+      }
+
+      clients[username] = {
         ws,
         roomId
       };
 
+      ws.send(JSON.stringify({
+        type: "join-success",
+        username,
+        roomId
+      }));
       broadcastParticipants(roomId);
       return;
     }
@@ -153,7 +183,7 @@ wss.on("connection", (ws) => {
   ws.on("close", () => {
     const username = getUsernameBySocket(ws);
 
-    if (username) {
+    if (username && clients[username]) {
       const roomId = clients[username].roomId;
       delete clients[username];
       broadcastParticipants(roomId);
@@ -182,6 +212,10 @@ function getClientBySocket(targetSocket) {
 }
 
 function broadcastParticipants(roomId) {
+  if (!roomId) {
+    return;
+  }
+
   const participants = Object.keys(clients).filter((username) => {
     const client = clients[username];
     return client.roomId === roomId && client.ws.readyState === WebSocket.OPEN;

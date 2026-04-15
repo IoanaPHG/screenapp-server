@@ -5,786 +5,178 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ScreenApp</title>
   <style>
-    :root {
-      --bg: #f3f4f6;
-      --panel: #ffffff;
-      --soft: #f8fafc;
-      --line: #d1d5db;
-      --text: #111827;
-      --muted: #6b7280;
-      --accent: #ea580c;
-      --accent-dark: #c2410c;
-      --dark: #111827;
-      --success: #166534;
-      --warning: #9a3412;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .app {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 320px 1fr;
-    }
-
-    .sidebar {
-      background: var(--panel);
-      border-right: 1px solid var(--line);
-      padding: 20px;
-    }
-
-    .brand {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
-
-    .label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-    }
-
-    .userCard,
-    .status,
-    .notice {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      background: var(--soft);
-      margin-bottom: 14px;
-    }
-
-    .userName {
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .muted {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .roomGrid,
-    .participants {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    button {
-      width: 100%;
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font: inherit;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .roomButton,
-    .participantButton,
-    .secondary {
-      background: var(--soft);
-      color: var(--text);
-      border: 1px solid var(--line);
-    }
-
-    .roomButton.active,
-    .participantButton.active {
-      background: #fff7ed;
-      border-color: var(--accent);
-      color: var(--accent-dark);
-    }
-
-    .primary {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .danger {
-      background: var(--dark);
-      color: #fff;
-      margin-top: 10px;
-    }
-
-    button[disabled] {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .status {
-      background: #ecfdf5;
-      color: var(--success);
-      min-height: 48px;
-    }
-
-    .notice {
-      color: var(--warning);
-      background: #fff7ed;
-    }
-
-    .main {
-      padding: 20px;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 16px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-    }
-
-    .topTitle {
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .topMeta {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .badge {
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: #dbeafe;
-      color: #1d4ed8;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .screen {
-      position: relative;
-      min-height: 520px;
-      border-radius: 16px;
-      overflow: hidden;
-      background: #0f172a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #111827;
-    }
-
-    .placeholder {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #cbd5e1;
-      font-size: 18px;
-      pointer-events: none;
-    }
-
-    .logGrid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .logCard {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px;
-    }
-
-    .logTitle {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
-    }
-
-    .logBody {
-      white-space: pre-wrap;
-      font-size: 13px;
-      color: var(--muted);
-      min-height: 110px;
-    }
-
-    @media (max-width: 980px) {
-      .app {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .screen {
-        min-height: 300px;
-      }
-
-      .logGrid {
-        grid-template-columns: 1fr;
-      }
-    }
+    :root{--bg:#ebe4d7;--panel:#fffdf9;--soft:#f7f1e8;--line:#d8ccb6;--text:#1f1b16;--muted:#726558;--accent:#b45309;--success:#166534;--danger:#991b1b;--info:#1d4ed8}
+    *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Tahoma,sans-serif;color:var(--text);background:linear-gradient(180deg,#efe7da,#e7dccb)}
+    button,input{font:inherit}button{border:0;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer}button[disabled]{opacity:.45;cursor:not-allowed}input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px}
+    .app{min-height:100vh;display:grid;grid-template-columns:320px 1fr;gap:18px;padding:18px}.card{background:rgba(255,253,249,.94);border:1px solid var(--line);border-radius:22px;padding:18px}.side,.main{display:flex;flex-direction:column;gap:14px;min-width:0}
+    .brand{font-size:30px;font-weight:800}.muted{color:var(--muted);line-height:1.5}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .name{font-size:24px;font-weight:800}.status{margin-top:12px;padding:12px 14px;border-radius:16px;background:#eef8f0;color:var(--success);min-height:48px;display:flex;align-items:center}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}.chip,.badge{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+    .chip{background:#ede9e1;color:#57534e}.chip.connecting{background:#dbeafe;color:var(--info)}.chip.online{background:#dcfce7;color:var(--success)}.chip.error{background:#fee2e2;color:var(--danger)}
+    .primary{background:linear-gradient(135deg,#c96b17,var(--accent));color:#fff}.secondary{background:var(--soft);border:1px solid var(--line);color:var(--text)}.danger{background:#2f2720;color:#fff}.actions,.participants,.logs{display:grid;gap:10px}
+    .participant{text-align:left;background:#fff;border:1px solid var(--line)}.participant.active{background:#fff4e8;color:#92400e}.participant strong,.participant span{display:block}.participant span{margin-top:4px;font-size:13px;font-weight:500;color:var(--muted)}
+    .badge{background:#dbeafe;color:var(--info)}
+    .screen{position:relative;min-height:420px;border-radius:26px;overflow:hidden;background:#17130f}.screen video{width:100%;height:100%;min-height:420px;object-fit:contain}.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center;color:#f5e8d2;background:linear-gradient(180deg,rgba(28,22,16,.2),rgba(28,22,16,.55))}
+    .overlayBar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:18px;background:rgba(20,15,11,.62);color:#fff9f1}.overlayBar strong,.overlayBar span{display:block}.overlayBar span{margin-top:4px;color:rgba(255,249,241,.78);font-size:14px}
+    .logBody{min-height:140px;white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1.5}.logs{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .overlay{position:fixed;inset:0;background:rgba(31,27,22,.54);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.overlay.visible{display:flex}.modal{width:min(460px,100%);padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:24px}
+    .modalTitle{font-size:24px;font-weight:800}.modalText{margin:10px 0 18px;color:var(--muted);line-height:1.6}.modalActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.single{grid-template-columns:1fr}.error{margin-top:10px;color:var(--danger);min-height:20px;font-size:14px}
+    @media (max-width:1050px){.app{grid-template-columns:1fr}.logs{grid-template-columns:1fr}}
+    @media (max-width:720px){.app{padding:12px}.hero,.overlayBar,.row{flex-direction:column;align-items:stretch}.screen,.screen video{min-height:300px}.modalActions{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
+  <div id="nameOverlay" class="overlay visible"><div class="modal"><div class="modalTitle">Bine ai venit</div><div class="modalText">Introdu numele tau pentru a intra in camera comuna si a vedea participantii disponibili.</div><div class="eyebrow">Nume</div><input id="nameInput" type="text" maxlength="32" placeholder="Ex: Andrei"><div id="nameError" class="error"></div><div class="modalActions single"><button id="saveNameButton" class="primary">Intra in aplicatie</button></div></div></div>
+  <div id="requestOverlay" class="overlay"><div class="modal"><div class="modalTitle">Cerere de acces</div><div id="requestMessage" class="modalText">Un participant cere acces la ecranul tau.</div><div class="modalActions"><button id="approveRequestButton" class="primary">Accepta</button><button id="denyRequestButton" class="secondary">Refuza</button></div></div></div>
+
   <main class="app">
-    <aside class="sidebar">
-      <div class="brand">ScreenApp</div>
-
-      <div class="label">You</div>
-      <div class="userCard">
-        <div id="userName" class="userName">-</div>
-        <div class="muted">Desktop remote support</div>
-      </div>
-
-      <div class="label">Session</div>
-      <div class="notice">Everyone joins the same ScreenApp room. Click a participant to request access.</div>
-
-      <button id="connectButton" class="primary">Join</button>
-      <button id="stopSessionButton" class="danger" disabled>Stop Session</button>
-
-      <div id="status" class="status">Choose a room and connect.</div>
-      <div id="desktopNotice" class="notice">In Electron, accepted requests start screen share and control together.</div>
-
-      <div class="label">Participants</div>
-      <div id="participants" class="participants"></div>
+    <aside class="side">
+      <section class="card"><div class="eyebrow">Identitate</div><div id="userName" class="name">Nepornit</div><div id="status" class="status">Introdu numele tau pentru a continua.</div></section>
+      <section class="card"><div class="row"><div class="eyebrow" style="margin-bottom:0">Conexiune</div><div id="connectionChip" class="chip">Offline</div></div><div class="actions"><button id="connectButton" class="primary" disabled>Conecteaza-te</button><button id="stopSessionButton" class="danger" disabled>Opreste sesiunea</button></div></section>
+      <section class="card"><div class="eyebrow">Participanti</div><div class="muted">Selecteaza persoana la care vrei acces. Cererea apare direct in interfata ei.</div><div id="participants" class="participants"><div class="muted">Niciun alt participant conectat momentan.</div></div></section>
     </aside>
 
     <section class="main">
-      <div class="topbar">
-        <div>
-          <div class="topTitle">Remote Screen</div>
-          <div id="viewerMeta" class="topMeta">Join, then click a participant to request access.</div>
-        </div>
-        <div id="modeBadge" class="badge">Desktop</div>
-      </div>
-
-      <div class="screen">
-        <video id="screenVideo" autoplay playsinline muted></video>
-        <div id="placeholder" class="placeholder">Waiting for a remote session...</div>
-      </div>
-
-      <div class="logGrid">
-        <div class="logCard">
-          <div class="logTitle">App Log</div>
-          <div id="logs" class="logBody">Activity log</div>
-        </div>
-        <div class="logCard">
-          <div class="logTitle">Control Pipeline</div>
-          <div id="controlLogs" class="logBody">Waiting for session logs...</div>
-        </div>
-      </div>
+      <section class="screen"><video id="screenVideo" autoplay playsinline muted></video><div id="placeholder" class="placeholder">Aici va aparea ecranul partajat dupa ce o cerere este acceptata.</div><div class="overlayBar"><div><strong id="sessionTitle">Fara sesiune activa</strong><span id="sessionMeta">Controlul remote este disponibil doar dupa acceptarea cererii.</span></div><div id="modeBadge" class="badge">Desktop</div><div id="sessionBadge" class="badge" style="background:#ede9e1;color:#57534e">In asteptare</div></div></section>
+      <section class="logs"><div class="card"><div class="eyebrow">App Log</div><div id="logs" class="logBody">Jurnalul aplicatiei va aparea aici.</div></div><div class="card"><div class="eyebrow">Control Pipeline</div><div id="controlLogs" class="logBody">Jurnalul pentru control remote va aparea aici.</div></div></section>
     </section>
   </main>
 
   <script>
-    const SCREENAPP_ROOM = "screenapp";
-
-    const connectButton = document.getElementById("connectButton");
-    const stopSessionButton = document.getElementById("stopSessionButton");
-    const statusText = document.getElementById("status");
-    const screenVideo = document.getElementById("screenVideo");
-    const participantsBox = document.getElementById("participants");
-    const logs = document.getElementById("logs");
-    const controlLogs = document.getElementById("controlLogs");
-    const placeholder = document.getElementById("placeholder");
-    const viewerMeta = document.getElementById("viewerMeta");
-    const modeBadge = document.getElementById("modeBadge");
-    const desktopNotice = document.getElementById("desktopNotice");
-    const userNameLabel = document.getElementById("userName");
-
-    const isDesktopApp = Boolean(window.screenAppDesktop?.isElectronDesktop);
-
-    let ws = null;
-    let pc = null;
-    let localStream = null;
-    let username = "";
-    let joinedRoomId = SCREENAPP_ROOM;
-    let targetUser = "";
-    let participants = [];
-    let localShareActive = false;
-    let remoteStreamActive = false;
-    let lastMouseSentAt = 0;
-    let controlTargetUser = "";
-    let acceptedControllerUser = "";
-    let hasControlPermission = false;
+    const ROOM="screenapp";
+    const $=id=>document.getElementById(id);
+    const isDesktopApp=Boolean(window.screenAppDesktop?.isElectronDesktop);
+    const signalingBaseUrl=window.screenAppDesktop?.signalingUrl || window.location.origin;
+    const els={connectButton:$("connectButton"),stopSessionButton:$("stopSessionButton"),status:$("status"),screenVideo:$("screenVideo"),participants:$("participants"),logs:$("logs"),controlLogs:$("controlLogs"),placeholder:$("placeholder"),modeBadge:$("modeBadge"),userName:$("userName"),connectionChip:$("connectionChip"),sessionTitle:$("sessionTitle"),sessionMeta:$("sessionMeta"),sessionBadge:$("sessionBadge"),nameOverlay:$("nameOverlay"),requestOverlay:$("requestOverlay"),nameInput:$("nameInput"),nameError:$("nameError"),saveNameButton:$("saveNameButton"),requestMessage:$("requestMessage"),approveRequestButton:$("approveRequestButton"),denyRequestButton:$("denyRequestButton")};
+    let ws=null,pc=null,localStream=null,username="",targetUser="",participants=[],localShareActive=false,remoteStreamActive=false,lastMouseSentAt=0,controlTargetUser="",acceptedControllerUser="",hasControlPermission=false,pendingIncomingRequest="",pendingOutgoingRequest="",suppressNextCloseMessage=false;
 
     init();
 
-    function init() {
-      username = askUsername();
-      userNameLabel.textContent = username;
-      renderParticipants();
-
-      if (isDesktopApp) {
-        modeBadge.textContent = "Desktop";
-        desktopNotice.textContent = "Desktop mode active. Approved requests start share and control together.";
-      } else {
-        modeBadge.textContent = "Web";
-        modeBadge.style.background = "#fee2e2";
-        modeBadge.style.color = "#b91c1c";
-        desktopNotice.textContent = "Web mode is for viewing. Use Electron on both sides for stable control.";
-      }
-
-      if (window.screenAppDesktop?.onDesktopLog) {
-        window.screenAppDesktop.onDesktopLog((message) => {
-          logControlLine(`DESKTOP ${message}`);
-        });
-      }
+    function init(){
+      if(!isDesktopApp){els.modeBadge.textContent="Web";els.modeBadge.style.background="#fee2e2";els.modeBadge.style.color="#991b1b"}
+      updateConnectionState("offline");updateSessionBadge("idle");renderParticipants();
+      if(window.screenAppDesktop?.onDesktopLog){window.screenAppDesktop.onDesktopLog(message=>logControlLine("DESKTOP "+message))}
+      els.connectButton.addEventListener("click",connectToRoom);els.stopSessionButton.addEventListener("click",stopSession);els.saveNameButton.addEventListener("click",handleNameSubmit);els.approveRequestButton.addEventListener("click",approveIncomingRequest);els.denyRequestButton.addEventListener("click",denyIncomingRequest);
+      els.nameInput.addEventListener("keydown",e=>{if(e.key==="Enter")handleNameSubmit()});
+      ["mousemove","mousedown","mouseup","click","dblclick","contextmenu"].forEach(type=>els.screenVideo.addEventListener(type,forwardMouseEvent));
+      els.screenVideo.addEventListener("wheel",forwardScrollEvent,{passive:false});window.addEventListener("keydown",forwardKeyboardEvent);window.addEventListener("keyup",forwardKeyboardEvent);els.nameInput.focus();
     }
 
-    connectButton.addEventListener("click", connectToRoom);
-    stopSessionButton.addEventListener("click", stopSession);
-    screenVideo.addEventListener("mousemove", forwardMouseEvent);
-    screenVideo.addEventListener("mousedown", forwardMouseEvent);
-    screenVideo.addEventListener("mouseup", forwardMouseEvent);
-    screenVideo.addEventListener("click", forwardMouseEvent);
-    screenVideo.addEventListener("dblclick", forwardMouseEvent);
-    screenVideo.addEventListener("contextmenu", forwardMouseEvent);
-    screenVideo.addEventListener("wheel", forwardScrollEvent, { passive: false });
-    window.addEventListener("keydown", forwardKeyboardEvent);
-    window.addEventListener("keyup", forwardKeyboardEvent);
-
-    function askUsername() {
-      let name = "";
-
-      while (!name) {
-        name = prompt("Cum te numesti?")?.trim() || "";
-      }
-
-      return name;
+    function handleNameSubmit(){
+      const proposedName=els.nameInput.value.trim();
+      if(!proposedName){els.nameError.textContent="Introdu un nume inainte sa continui.";els.nameInput.focus();return}
+      username=proposedName;els.userName.textContent=username;els.connectButton.disabled=false;els.nameError.textContent="";els.nameOverlay.classList.remove("visible");setStatus("Numele a fost salvat. Se porneste conectarea.");connectToRoom();
     }
 
-    function connectToRoom() {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        setStatus("Already connected");
-        return;
-      }
-      targetUser = "";
-      participants = [];
-      renderParticipants();
-
-      const protocol = location.protocol === "https:" ? "wss" : "ws";
-      ws = new WebSocket(`${protocol}://${location.host}`);
-      pc = createPeerConnection();
-
-      ws.addEventListener("open", () => {
-        ws.send(JSON.stringify({
-          type: "join",
-          username,
-          roomId: joinedRoomId
-        }));
-
-        setStatus("Connected");
-        viewerMeta.textContent = "Click a participant to request access.";
-        logLine(`Joined ${joinedRoomId}`);
-        logControlLine(`PIPELINE joined ${joinedRoomId} as ${username}`);
-      });
-
-      ws.addEventListener("close", () => {
-        setStatus("Connection closed");
-        logLine("WebSocket closed.");
-        logControlLine("PIPELINE WebSocket closed");
-      });
-
-      ws.addEventListener("error", () => {
-        setStatus("WebSocket error");
-        logLine("WebSocket error.");
-        logControlLine("PIPELINE WebSocket error");
-      });
-
-      ws.onmessage = async (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          logLine(`Received: ${data.type}`);
-
-          if (data.error) {
-            setStatus(data.error);
-            return;
-          }
-
-          if (data.type === "participants") {
-            participants = data.participants.filter((name) => name !== username);
-            renderParticipants();
-            return;
-          }
-
-          if (data.type === "access-request") {
-            const accepted = confirm(`${data.from} wants access to your screen. Allow?`);
-
-            if (!accepted) {
-              ws.send(JSON.stringify({
-                type: "access-denied",
-                to: data.from
-              }));
-              setStatus(`Access denied for ${data.from}`);
-              logControlLine(`ACCESS denied for ${data.from}`);
-              return;
-            }
-
-            ws.send(JSON.stringify({
-              type: "access-approved",
-              to: data.from
-            }));
-
-            setStatus(`Access approved for ${data.from}`);
-            logControlLine(`ACCESS approved for ${data.from}`);
-            await startSessionForRequester(data.from);
-            return;
-          }
-
-          if (data.type === "access-approved") {
-            targetUser = data.from;
-            setStatus(`Access approved by ${data.from}. Waiting for stream...`);
-            viewerMeta.textContent = `Waiting for ${data.from} to share the screen`;
-            logControlLine(`ACCESS approved by ${data.from}`);
-            return;
-          }
-
-          if (data.type === "access-denied") {
-            setStatus(`Access denied by ${data.from}`);
-            logControlLine(`ACCESS denied by ${data.from}`);
-            return;
-          }
-
-          if (data.type === "offer") {
-            targetUser = data.from;
-            controlTargetUser = data.from;
-            hasControlPermission = Boolean(data.allowRemoteControl);
-            pc = createPeerConnection();
-
-            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-            logControlLine(`SIGNAL offer from ${data.from}`);
-
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-
-            ws.send(JSON.stringify({
-              type: "answer",
-              to: data.from,
-              answer
-            }));
-
-            setStatus(`Connected to ${data.from}`);
-            viewerMeta.textContent = `Viewing ${data.from}`;
-            logControlLine(`SIGNAL answer sent to ${data.from}`);
-            return;
-          }
-
-          if (data.type === "answer") {
-            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-            setStatus(`Viewer connected: ${data.from}`);
-            logControlLine(`SIGNAL answer received from ${data.from}`);
-            return;
-          }
-
-          if (data.type === "ice" && data.candidate) {
-            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-            logControlLine(`SIGNAL ice from ${data.from}`);
-            return;
-          }
-
-          if (data.type === "stop-share") {
-            resetSessionState(`Session ended by ${data.from}`);
-            logControlLine(`PIPELINE session stopped by ${data.from}`);
-            return;
-          }
-
-          if (data.type === "control-revoked") {
-            hasControlPermission = false;
-            controlTargetUser = "";
-            acceptedControllerUser = "";
-            setStatus(`Control stopped by ${data.from}`);
-            logControlLine(`CONTROL revoked by ${data.from}`);
-            return;
-          }
-
-          if (data.type === "remote-mouse") {
-            if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
-              logControlLine(`REMOTE mouse from ${data.from}`);
-              await window.screenAppDesktop.executeRemoteMouse(data);
-            }
-            return;
-          }
-
-          if (data.type === "remote-keyboard") {
-            if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
-              logControlLine(`REMOTE keyboard from ${data.from} -> ${data.key}`);
-              await window.screenAppDesktop.executeRemoteKeyboard(data);
-            }
-            return;
-          }
-
-          if (data.type === "remote-scroll") {
-            if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
-              logControlLine(`REMOTE scroll from ${data.from} -> ${data.deltaY}`);
-              await window.screenAppDesktop.executeRemoteScroll(data);
-            }
-          }
-        } catch (error) {
-          logLine(`Error: ${error.message}`);
-        }
-      };
+    function connectToRoom(){
+      if(!username){els.nameOverlay.classList.add("visible");els.nameInput.focus();return}
+      if(ws&&(ws.readyState===WebSocket.OPEN||ws.readyState===WebSocket.CONNECTING)){setStatus("Conexiunea este deja activa.");return}
+      cleanupConnectionArtifacts();resetSessionState("Conexiunea este pregatita pentru o noua sesiune.");updateConnectionState("connecting");els.connectButton.disabled=true;participants=[];renderParticipants();setStatus("Se initializeaza conexiunea...");
+      const signalingWsUrl=toWebSocketUrl(signalingBaseUrl);ws=new WebSocket(signalingWsUrl);
+      ws.addEventListener("open",()=>{ws.send(JSON.stringify({type:"join",username,roomId:ROOM}));logLine("Join requested for "+username)});
+      ws.addEventListener("close",()=>{const shouldPreserveStatus=suppressNextCloseMessage;suppressNextCloseMessage=false;updateConnectionState("offline");els.connectButton.disabled=false;participants=[];renderParticipants();cleanupConnectionArtifacts();resetSessionState(shouldPreserveStatus?els.status.textContent:"Conexiunea a fost inchisa.");logLine("WebSocket closed.");logControlLine("PIPELINE WebSocket closed");ws=null});
+      ws.addEventListener("error",()=>{updateConnectionState("error");els.connectButton.disabled=false;setStatus("A aparut o eroare la conectare.");logLine("WebSocket error.");logControlLine("PIPELINE WebSocket error")});
+      ws.onmessage=async event=>{try{const data=JSON.parse(event.data);logLine("Received: "+(data.type||"unknown"));if(data.type==="join-success"){updateConnectionState("online");els.connectButton.disabled=false;setStatus("Conectat. Acum poti selecta un participant.");logControlLine("PIPELINE joined "+data.roomId+" as "+data.username);return}
+        if(data.type==="join-error"){handleJoinError(data.error||"Nu s-a putut intra in camera.");return}
+        if(data.error){setStatus(data.error);return}
+        if(data.type==="participants"){participants=data.participants.filter(name=>name!==username);renderParticipants();return}
+        if(data.type==="access-request"){pendingIncomingRequest=data.from;els.requestMessage.textContent=data.from+" cere acces la ecranul si controlul desktop-ului tau.";els.requestOverlay.classList.add("visible");setStatus("Ai primit o cerere de acces de la "+data.from+".");updateSessionBadge("incoming");return}
+        if(data.type==="access-approved"){pendingOutgoingRequest="";targetUser=data.from;setStatus("Cererea a fost acceptata de "+data.from+". Se asteapta stream-ul.");updateSessionBadge("waiting");logControlLine("ACCESS approved by "+data.from);renderParticipants();return}
+        if(data.type==="access-denied"){pendingOutgoingRequest="";setStatus("Cererea a fost refuzata de "+data.from+".");updateSessionBadge("idle");logControlLine("ACCESS denied by "+data.from);renderParticipants();return}
+        if(data.type==="offer"){await handleOffer(data);return}
+        if(data.type==="answer"){if(!pc){logControlLine("SIGNAL answer ignored because peer connection is missing");return}await pc.setRemoteDescription(new RTCSessionDescription(data.answer));setStatus("Viewer connected: "+data.from);updateSessionBadge("live");logControlLine("SIGNAL answer received from "+data.from);return}
+        if(data.type==="ice"&&data.candidate){if(!pc){logControlLine("SIGNAL ice ignored because peer connection is missing");return}await pc.addIceCandidate(new RTCIceCandidate(data.candidate));logControlLine("SIGNAL ice from "+data.from);return}
+        if(data.type==="stop-share"){resetSessionState("Sesiunea a fost oprita de "+data.from+".");logControlLine("PIPELINE session stopped by "+data.from);return}
+        if(data.type==="control-revoked"){hasControlPermission=false;controlTargetUser="";acceptedControllerUser="";setStatus("Controlul remote a fost oprit de "+data.from+".");updateSessionBadge(remoteStreamActive?"view-only":"idle");logControlLine("CONTROL revoked by "+data.from);return}
+        if(data.type==="remote-mouse"){if(data.from===acceptedControllerUser&&window.screenAppDesktop?.isElectronDesktop){logControlLine("REMOTE mouse from "+data.from);await window.screenAppDesktop.executeRemoteMouse(data)}return}
+        if(data.type==="remote-keyboard"){if(data.from===acceptedControllerUser&&window.screenAppDesktop?.isElectronDesktop){logControlLine("REMOTE keyboard from "+data.from+" -> "+data.key);await window.screenAppDesktop.executeRemoteKeyboard(data)}return}
+        if(data.type==="remote-scroll"){if(data.from===acceptedControllerUser&&window.screenAppDesktop?.isElectronDesktop){logControlLine("REMOTE scroll from "+data.from+" -> "+data.deltaY);await window.screenAppDesktop.executeRemoteScroll(data)}}}
+      catch(error){logLine("Error: "+error.message)}};
     }
 
-    async function startSessionForRequester(requester) {
-      if (!isDesktopApp) {
-        setStatus("Use Electron to start remote control sessions.");
-        return;
-      }
+    async function approveIncomingRequest(){if(!pendingIncomingRequest||!isConnected()){els.requestOverlay.classList.remove("visible");return}const requester=pendingIncomingRequest;if(!isDesktopApp){ws.send(JSON.stringify({type:"access-denied",to:requester}));setStatus("Acceptarea necesita aplicatia Electron pe calculatorul care partajeaza.");logControlLine("ACCESS denied for "+requester+" because desktop mode is unavailable");pendingIncomingRequest="";els.requestOverlay.classList.remove("visible");updateSessionBadge("idle");return}els.requestOverlay.classList.remove("visible");pendingIncomingRequest="";await startSessionForRequester(requester)}
+    function denyIncomingRequest(){if(pendingIncomingRequest&&isConnected()){ws.send(JSON.stringify({type:"access-denied",to:pendingIncomingRequest}));setStatus("Cererea lui "+pendingIncomingRequest+" a fost refuzata.");logControlLine("ACCESS denied for "+pendingIncomingRequest)}pendingIncomingRequest="";els.requestOverlay.classList.remove("visible");updateSessionBadge("idle")}
 
-      if (!ws || ws.readyState !== WebSocket.OPEN) {
-        setStatus("WebSocket not connected.");
-        return;
-      }
-
-      targetUser = requester;
-      acceptedControllerUser = requester;
-      hasControlPermission = false;
-      controlTargetUser = "";
-
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-      }
-
-      localStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true
-      });
-
-      localShareActive = true;
-      stopSessionButton.disabled = false;
-      screenVideo.srcObject = localStream;
-      placeholder.style.display = "none";
-      viewerMeta.textContent = `Sharing to ${requester}`;
-
-      pc = createPeerConnection();
-
-      localStream.getTracks().forEach((track) => {
-        pc.addTrack(track, localStream);
-        track.onended = () => stopSession();
-      });
-
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-
-      ws.send(JSON.stringify({
-        type: "offer",
-        to: requester,
-        offer,
-        allowRemoteControl: true
-      }));
-
-      setStatus(`Session started with ${requester}`);
-      logControlLine(`PIPELINE session started for ${requester}`);
+    async function handleOffer(data){
+      targetUser=data.from;controlTargetUser=data.from;hasControlPermission=Boolean(data.allowRemoteControl);resetPeerConnection();pc=createPeerConnection();
+      await pc.setRemoteDescription(new RTCSessionDescription(data.offer));logControlLine("SIGNAL offer from "+data.from);const answer=await pc.createAnswer();await pc.setLocalDescription(answer);
+      ws.send(JSON.stringify({type:"answer",to:data.from,answer}));setStatus("Conectat la "+data.from+".");els.sessionTitle.textContent="Sesiune cu "+data.from;els.sessionMeta.textContent=hasControlPermission?"Controlul remote este activ pe acest viewer.":"Doar vizualizare activa.";updateSessionBadge(hasControlPermission?"control":"view-only");logControlLine("SIGNAL answer sent to "+data.from);
     }
 
-    function stopSession() {
-      if (!localShareActive && !remoteStreamActive && !localStream) {
-        return;
-      }
-
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-      }
-
-      if (ws && ws.readyState === WebSocket.OPEN && targetUser) {
-        ws.send(JSON.stringify({
-          type: "stop-share",
-          to: targetUser
-        }));
-
-        ws.send(JSON.stringify({
-          type: "control-revoked",
-          to: targetUser
-        }));
-      }
-
-      resetSessionState("Session stopped");
-      logControlLine("PIPELINE local session stopped");
+    async function startSessionForRequester(requester){
+      if(!isDesktopApp){setStatus("Partajarea desktop cu control necesita aplicatia Electron.");updateSessionBadge("idle");return}
+      if(!isConnected()){setStatus("WebSocket nu este conectat.");updateSessionBadge("idle");return}
+      targetUser=requester;acceptedControllerUser=requester;hasControlPermission=false;controlTargetUser="";stopLocalStream();resetPeerConnection();
+      try{localStream=await navigator.mediaDevices.getDisplayMedia({video:true})}catch(error){setStatus("Partajarea ecranului a fost anulata.");updateSessionBadge("idle");logControlLine("PIPELINE screen share canceled");return}
+      ws.send(JSON.stringify({type:"access-approved",to:requester}));setStatus("Cererea lui "+requester+" a fost acceptata.");
+      localShareActive=true;els.stopSessionButton.disabled=false;els.screenVideo.srcObject=localStream;els.placeholder.style.display="none";els.sessionTitle.textContent="Partajezi catre "+requester;els.sessionMeta.textContent="Controlul remote este permis pentru participantul acceptat.";updateSessionBadge("sharing");
+      pc=createPeerConnection();localStream.getTracks().forEach(track=>{pc.addTrack(track,localStream);track.onended=()=>stopSession()});const offer=await pc.createOffer();await pc.setLocalDescription(offer);
+      ws.send(JSON.stringify({type:"offer",to:requester,offer,allowRemoteControl:true}));setStatus("Sesiunea a inceput cu "+requester+".");logControlLine("PIPELINE session started for "+requester);
     }
 
-    function resetSessionState(message) {
-      localStream = null;
-      localShareActive = false;
-      remoteStreamActive = false;
-      hasControlPermission = false;
-      controlTargetUser = "";
-      acceptedControllerUser = "";
-      stopSessionButton.disabled = true;
-      screenVideo.srcObject = null;
-      placeholder.style.display = "flex";
-      viewerMeta.textContent = targetUser
-        ? `Ready for ${targetUser}`
-        : "Click a participant to request access.";
-      setStatus(message);
-      pc = createPeerConnection();
+    function stopSession(){
+      if(!localShareActive&&!remoteStreamActive&&!localStream&&!pc)return;
+      stopLocalStream();resetPeerConnection();
+      if(isConnected()&&targetUser){ws.send(JSON.stringify({type:"stop-share",to:targetUser}));ws.send(JSON.stringify({type:"control-revoked",to:targetUser}))}
+      resetSessionState("Sesiunea a fost oprita.");logControlLine("PIPELINE local session stopped");
     }
 
-    function createPeerConnection() {
-      const peerConnection = new RTCPeerConnection();
+    function resetSessionState(message){
+      stopLocalStream();resetPeerConnection();localShareActive=false;remoteStreamActive=false;hasControlPermission=false;controlTargetUser="";acceptedControllerUser="";pendingOutgoingRequest="";targetUser="";els.stopSessionButton.disabled=true;els.screenVideo.srcObject=null;els.placeholder.style.display="flex";setStatus(message);els.sessionTitle.textContent="Fara sesiune activa";els.sessionMeta.textContent="Controlul remote este disponibil doar dupa acceptarea cererii.";updateSessionBadge("idle");renderParticipants();
+    }
 
-      peerConnection.ontrack = (event) => {
-        screenVideo.srcObject = event.streams[0];
-        placeholder.style.display = "none";
-        viewerMeta.textContent = `Viewing ${targetUser}`;
-        remoteStreamActive = true;
-        stopSessionButton.disabled = false;
-        setStatus(`Remote screen from ${targetUser}`);
-        logControlLine(`PIPELINE remote stream attached from ${targetUser}`);
-      };
-
-      peerConnection.onicecandidate = (event) => {
-        if (!event.candidate || !ws || ws.readyState !== WebSocket.OPEN || !targetUser) {
-          return;
-        }
-
-        ws.send(JSON.stringify({
-          type: "ice",
-          to: targetUser,
-          candidate: event.candidate
-        }));
-        logControlLine(`SIGNAL ice sent to ${targetUser}`);
-      };
-
+    function createPeerConnection(){
+      const peerConnection=new RTCPeerConnection();
+      peerConnection.ontrack=event=>{els.screenVideo.srcObject=event.streams[0];els.placeholder.style.display="none";els.sessionTitle.textContent="Sesiune cu "+targetUser;els.sessionMeta.textContent=hasControlPermission?"Controlul remote este activ.":"Flux video activ fara control remote.";remoteStreamActive=true;els.stopSessionButton.disabled=false;setStatus("Fluxul remote a fost conectat de la "+targetUser+".");updateSessionBadge(hasControlPermission?"control":"view-only");logControlLine("PIPELINE remote stream attached from "+targetUser)};
+      peerConnection.onicecandidate=event=>{if(!event.candidate||!isConnected()||!targetUser)return;ws.send(JSON.stringify({type:"ice",to:targetUser,candidate:event.candidate}));logControlLine("SIGNAL ice sent to "+targetUser)};
+      peerConnection.onconnectionstatechange=()=>{if(peerConnection.connectionState==="failed"){setStatus("Conexiunea WebRTC a esuat. Incearca din nou.");logControlLine("PIPELINE peer connection failed")}};
       return peerConnection;
     }
 
-    function renderParticipants() {
-      if (participants.length === 0) {
-        participantsBox.innerHTML = '<div class="empty">Nobody else is connected in this room.</div>';
-        return;
-      }
-
-      participantsBox.innerHTML = "";
-
-      participants.forEach((name) => {
-        const button = document.createElement("button");
-        button.textContent = name;
-        button.className = name === targetUser ? "participantButton active" : "participantButton";
-        button.addEventListener("click", () => {
-          targetUser = name;
-          setStatus(`Request sent to ${name}`);
-          viewerMeta.textContent = `Waiting for ${name} to accept`;
-          if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({
-              type: "access-request",
-              to: name
-            }));
-            logControlLine(`ACCESS request sent to ${name}`);
-          }
-          renderParticipants();
-        });
-        participantsBox.appendChild(button);
-      });
+    function renderParticipants(){
+      if(!participants.length){els.participants.innerHTML='<div class="muted">Niciun alt participant conectat momentan.</div>';return}
+      els.participants.innerHTML="";
+      participants.forEach(name=>{const button=document.createElement("button");const active=name===targetUser||name===pendingOutgoingRequest;button.className=active?"participant active":"participant";button.disabled=!isConnected();button.innerHTML="<strong>"+escapeHtml(name)+"</strong><span>"+(pendingOutgoingRequest===name?"Cerere trimisa. Se asteapta raspuns...":"Apasa pentru a cere acces.")+"</span>";button.addEventListener("click",()=>requestAccess(name));els.participants.appendChild(button)});
     }
 
-    function forwardMouseEvent(event) {
-      if (!hasControlPermission || !controlTargetUser || !remoteStreamActive) {
-        return;
-      }
-
-      if (event.type === "mousemove" && Date.now() - lastMouseSentAt < 30) {
-        return;
-      }
-
-      lastMouseSentAt = Date.now();
-
-      const rect = screenVideo.getBoundingClientRect();
-      ws.send(JSON.stringify({
-        type: "remote-mouse",
-        to: controlTargetUser,
-        eventType: event.type,
-        x: Math.round(event.clientX - rect.left),
-        y: Math.round(event.clientY - rect.top),
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
-        button: typeof event.button === "number" ? event.button : 0
-      }));
-      logControlLine(`SEND mouse ${event.type} -> ${controlTargetUser}`);
-
-      if (event.type === "contextmenu") {
-        event.preventDefault();
-      }
+    function requestAccess(name){
+      if(!isConnected()){setStatus("Conecteaza-te inainte sa trimiti o cerere.");return}
+      if(pendingOutgoingRequest){setStatus("Exista deja o cerere in curs catre "+pendingOutgoingRequest+".");return}
+      targetUser=name;pendingOutgoingRequest=name;els.sessionTitle.textContent="Cerere trimisa";els.sessionMeta.textContent="Dupa accept, sesiunea porneste direct din aplicatia celuilalt participant.";setStatus("Cererea a fost trimisa catre "+name+".");updateSessionBadge("waiting");ws.send(JSON.stringify({type:"access-request",to:name}));logControlLine("ACCESS request sent to "+name);renderParticipants();
     }
 
-    function forwardKeyboardEvent(event) {
-      if (!hasControlPermission || !controlTargetUser || !remoteStreamActive) {
-        return;
-      }
-
-      if (document.activeElement && ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
-        return;
-      }
-
-      ws.send(JSON.stringify({
-        type: "remote-keyboard",
-        to: controlTargetUser,
-        eventType: event.type,
-        key: event.key,
-        code: event.code,
-        altKey: event.altKey,
-        ctrlKey: event.ctrlKey,
-        shiftKey: event.shiftKey,
-        metaKey: event.metaKey
-      }));
-      logControlLine(`SEND keyboard ${event.type} -> ${event.key}`);
-      event.preventDefault();
+    function forwardMouseEvent(event){
+      if(!hasControlPermission||!controlTargetUser||!remoteStreamActive||!isConnected())return;
+      if(event.type==="mousemove"&&Date.now()-lastMouseSentAt<30)return;lastMouseSentAt=Date.now();
+      const rect=els.screenVideo.getBoundingClientRect();
+      ws.send(JSON.stringify({type:"remote-mouse",to:controlTargetUser,eventType:event.type,x:Math.round(event.clientX-rect.left),y:Math.round(event.clientY-rect.top),width:Math.round(rect.width),height:Math.round(rect.height),button:typeof event.button==="number"?event.button:0}));
+      logControlLine("SEND mouse "+event.type+" -> "+controlTargetUser);if(event.type==="contextmenu")event.preventDefault();
     }
 
-    function forwardScrollEvent(event) {
-      if (!hasControlPermission || !controlTargetUser || !remoteStreamActive) {
-        return;
-      }
-
-      ws.send(JSON.stringify({
-        type: "remote-scroll",
-        to: controlTargetUser,
-        deltaY: event.deltaY
-      }));
-      logControlLine(`SEND scroll -> ${event.deltaY}`);
-      event.preventDefault();
+    function forwardKeyboardEvent(event){
+      if(!hasControlPermission||!controlTargetUser||!remoteStreamActive||!isConnected())return;
+      if(document.activeElement&&["INPUT","TEXTAREA"].includes(document.activeElement.tagName))return;
+      ws.send(JSON.stringify({type:"remote-keyboard",to:controlTargetUser,eventType:event.type,key:event.key,code:event.code,altKey:event.altKey,ctrlKey:event.ctrlKey,shiftKey:event.shiftKey,metaKey:event.metaKey}));
+      logControlLine("SEND keyboard "+event.type+" -> "+event.key);event.preventDefault();
     }
 
-    function setStatus(message) {
-      statusText.textContent = message;
+    function forwardScrollEvent(event){
+      if(!hasControlPermission||!controlTargetUser||!remoteStreamActive||!isConnected())return;
+      ws.send(JSON.stringify({type:"remote-scroll",to:controlTargetUser,deltaY:event.deltaY}));logControlLine("SEND scroll -> "+event.deltaY);event.preventDefault();
     }
 
-    function logLine(message) {
-      const time = new Date().toLocaleTimeString();
-      logs.textContent = `[${time}] ${message}\n` + logs.textContent;
-    }
-
-    function logControlLine(message) {
-      const time = new Date().toLocaleTimeString();
-      controlLogs.textContent = `[${time}] ${message}\n` + controlLogs.textContent;
-    }
+    function cleanupConnectionArtifacts(){pendingIncomingRequest="";pendingOutgoingRequest="";els.requestOverlay.classList.remove("visible")}
+    function stopLocalStream(){if(!localStream)return;localStream.getTracks().forEach(track=>track.stop());localStream=null}
+    function resetPeerConnection(){if(!pc)return;pc.ontrack=null;pc.onicecandidate=null;pc.onconnectionstatechange=null;pc.close();pc=null}
+    function handleJoinError(message){suppressNextCloseMessage=true;if(ws){ws.close();ws=null}updateConnectionState("error");els.connectButton.disabled=false;setStatus(message);els.nameError.textContent=message;els.nameOverlay.classList.add("visible");els.nameInput.focus()}
+    function updateConnectionState(state){const labels={offline:"Offline",connecting:"Connecting",online:"Online",error:"Error"};els.connectionChip.textContent=labels[state]||"Offline";els.connectionChip.className="chip"+(state==="offline"?"":" "+state)}
+    function updateSessionBadge(state){const map={idle:["In asteptare","#ede9e1","#57534e"],incoming:["Cerere noua","#ffedd5","#9a3412"],waiting:["Se asteapta","#dbeafe","#1d4ed8"],live:["Live","#dcfce7","#166534"],sharing:["Partajezi","#dcfce7","#166534"],control:["Control activ","#dcfce7","#166534"],"view-only":["Doar vizualizare","#fef3c7","#92400e"]};const current=map[state]||map.idle;els.sessionBadge.textContent=current[0];els.sessionBadge.style.background=current[1];els.sessionBadge.style.color=current[2]}
+    function isConnected(){return ws&&ws.readyState===WebSocket.OPEN}
+    function setStatus(message){els.status.textContent=message}
+    function logLine(message){const time=new Date().toLocaleTimeString();els.logs.textContent="["+time+"] "+message+"\n"+els.logs.textContent}
+    function logControlLine(message){const time=new Date().toLocaleTimeString();els.controlLogs.textContent="["+time+"] "+message+"\n"+els.controlLogs.textContent}
+    function escapeHtml(value){return value.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
+    function toWebSocketUrl(baseUrl){if(baseUrl.startsWith("ws://")||baseUrl.startsWith("wss://"))return baseUrl;return baseUrl.replace(/^http:\/\//,"ws://").replace(/^https:\/\//,"wss://")}
   </script>
 </body>
 </html>
