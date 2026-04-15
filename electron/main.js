@@ -1,5 +1,9 @@
 const { app, BrowserWindow, desktopCapturer, ipcMain, session, shell } = require("electron");
-const { executeRemoteKeyboard, executeRemoteMouse } = require("./remote-control");
+const {
+  executeRemoteKeyboard,
+  executeRemoteMouse,
+  executeRemoteScroll
+} = require("./remote-control");
 
 const APP_URL = process.env.SCREENAPP_URL || "https://screenapp-server.onrender.com";
 const windows = new Set();
@@ -96,6 +100,19 @@ ipcMain.handle("remote-control:keyboard", async (event, payload) => {
     return result;
   } catch (error) {
     logDesktopEvent(`Keyboard failed: ${error.message}`);
+    throw error;
+  }
+});
+
+ipcMain.handle("remote-control:scroll", async (event, payload) => {
+  logDesktopEvent(`Scroll -> ${payload.deltaY}`);
+
+  try {
+    const result = await executeRemoteScroll(payload);
+    logDesktopEvent(`Scroll executed (${result.action})`);
+    return result;
+  } catch (error) {
+    logDesktopEvent(`Scroll failed: ${error.message}`);
     throw error;
   }
 });

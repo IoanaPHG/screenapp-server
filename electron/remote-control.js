@@ -46,8 +46,24 @@ async function executeRemoteMouse(payload) {
   const point = toScreenPoint(payload);
   await mouse.move(straightTo(point));
 
+  if (payload.eventType === "mousedown") {
+    await mouse.pressButton(toMouseButton(payload.button));
+  }
+
+  if (payload.eventType === "mouseup") {
+    await mouse.releaseButton(toMouseButton(payload.button));
+  }
+
   if (payload.eventType === "click") {
     await mouse.click(toMouseButton(payload.button));
+  }
+
+  if (payload.eventType === "dblclick") {
+    await mouse.doubleClick(toMouseButton(payload.button));
+  }
+
+  if (payload.eventType === "contextmenu") {
+    await mouse.click(Button.RIGHT);
   }
 
   return { ok: true, simulated: true, action: payload.eventType, point };
@@ -77,6 +93,17 @@ async function executeRemoteKeyboard(payload) {
 
   await keyboard.type(key);
   return { ok: true, simulated: true, action: `type:${payload.key}` };
+}
+
+async function executeRemoteScroll(payload) {
+  const amount = Number(payload.deltaY || 0);
+  const direction = amount > 0 ? "down" : "up";
+  const steps = Math.max(1, Math.min(10, Math.round(Math.abs(amount) / 40) || 1));
+
+  await mouse.scrollDown(direction === "down" ? steps : 0);
+  await mouse.scrollUp(direction === "up" ? steps : 0);
+
+  return { ok: true, simulated: true, action: `scroll:${direction}:${steps}` };
 }
 
 function toScreenPoint(payload) {
@@ -131,5 +158,6 @@ function isModifierKey(key) {
 
 module.exports = {
   executeRemoteKeyboard,
-  executeRemoteMouse
+  executeRemoteMouse,
+  executeRemoteScroll
 };

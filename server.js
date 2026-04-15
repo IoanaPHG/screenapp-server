@@ -118,7 +118,9 @@ wss.on("connection", (ws) => {
       (data.type === "control-granted" && data.to) ||
       (data.type === "control-revoked" && data.to) ||
       (data.type === "remote-mouse" && data.to) ||
-      (data.type === "remote-keyboard" && data.to)
+      (data.type === "remote-keyboard" && data.to) ||
+      (data.type === "remote-scroll" && data.to) ||
+      (data.type === "stop-share" && data.to)
     ) {
       const sender = getClientBySocket(ws);
       const recipient = clients[data.to];

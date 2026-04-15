@@ -296,6 +296,7 @@
 
       <button id="connectButton" class="primary">Connect</button>
       <button id="shareButton" class="secondary" disabled>Share Screen</button>
+      <button id="stopShareButton" class="secondary" disabled>Stop Share</button>
 
       <label class="toggle" for="allowRemoteControl">
         <input id="allowRemoteControl" type="checkbox" />
@@ -343,6 +344,7 @@
     const roomIdInput = document.getElementById("roomId");
     const connectButton = document.getElementById("connectButton");
     const shareButton = document.getElementById("shareButton");
+    const stopShareButton = document.getElementById("stopShareButton");
     const allowRemoteControlCheckbox = document.getElementById("allowRemoteControl");
     const statusText = document.getElementById("status");
     const screenVideo = document.getElementById("screenVideo");
@@ -368,6 +370,7 @@
     let allowRemoteControl = false;
     let remoteStreamActive = false;
     let lastMouseSentAt = 0;
+    let localShareActive = false;
 
     if (isDesktopApp) {
       modeBadge.textContent = "Desktop";
@@ -387,9 +390,14 @@
 
     connectButton.addEventListener("click", connect);
     shareButton.addEventListener("click", shareScreen);
+    stopShareButton.addEventListener("click", stopShare);
     screenVideo.addEventListener("mousemove", forwardMouseEvent);
     screenVideo.addEventListener("mousedown", forwardMouseEvent);
+    screenVideo.addEventListener("mouseup", forwardMouseEvent);
     screenVideo.addEventListener("click", forwardMouseEvent);
+    screenVideo.addEventListener("dblclick", forwardMouseEvent);
+    screenVideo.addEventListener("contextmenu", forwardMouseEvent);
+    screenVideo.addEventListener("wheel", forwardScrollEvent, { passive: false });
     window.addEventListener("keydown", forwardKeyboardEvent);
     window.addEventListener("keyup", forwardKeyboardEvent);
 
@@ -427,6 +435,7 @@
       ws.addEventListener("close", () => {
         setStatus("Connection closed");
         shareButton.disabled = true;
+        stopShareButton.disabled = true;
         logLine("WebSocket closed.");
         logControlLine("PIPELINE WebSocket closed");
       });
@@ -506,6 +515,19 @@
             return;
           }
 
+          if (data.type === "stop-share") {
+            remoteStreamActive = false;
+            hasControlPermission = false;
+            controlTargetUser = "";
+            acceptedControllerUser = "";
+            screenVideo.srcObject = null;
+            placeholder.style.display = "flex";
+            viewerMeta.textContent = "Remote session ended";
+            setStatus(`Share stopped by ${data.from}`);
+            logControlLine(`PIPELINE share stopped by ${data.from}`);
+            return;
+          }
+
           if (data.type === "remote-mouse") {
             if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
               logControlLine(`REMOTE mouse from ${data.from}`);
@@ -518,6 +540,14 @@
             if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
               logControlLine(`REMOTE keyboard from ${data.from} -> ${data.key}`);
               await window.screenAppDesktop.executeRemoteKeyboard(data);
+            }
+            return;
+          }
+
+          if (data.type === "remote-scroll") {
+            if (data.from === acceptedControllerUser && window.screenAppDesktop?.isElectronDesktop) {
+              logControlLine(`REMOTE scroll from ${data.from} -> ${data.deltaY}`);
+              await window.screenAppDesktop.executeRemoteScroll(data);
             }
           }
         } catch (error) {
@@ -548,9 +578,17 @@
         screenVideo.srcObject = localStream;
         placeholder.style.display = "none";
         viewerMeta.textContent = `Sharing to ${targetUser}`;
+        localShareActive = true;
+        stopShareButton.disabled = false;
 
         localStream.getTracks().forEach((track) => {
           pc.addTrack(track, localStream);
+        });
+
+        localStream.getTracks().forEach((track) => {
+          track.onended = () => {
+            stopShare();
+          };
         });
 
         const offer = await pc.createOffer();
@@ -580,6 +618,41 @@
         setStatus("Screen share failed.");
         logControlLine(`PIPELINE share failed: ${error.message}`);
       }
+    }
+
+    function stopShare() {
+      if (!localShareActive && !localStream) {
+        return;
+      }
+
+      if (localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
+      }
+
+      localStream = null;
+      localShareActive = false;
+      hasControlPermission = false;
+      remoteStreamActive = false;
+      controlTargetUser = "";
+      screenVideo.srcObject = null;
+      placeholder.style.display = "flex";
+      viewerMeta.textContent = targetUser ? `Ready for ${targetUser}` : "Select a participant and start sharing.";
+      stopShareButton.disabled = true;
+
+      if (ws && ws.readyState === WebSocket.OPEN && targetUser) {
+        ws.send(JSON.stringify({
+          type: "stop-share",
+          to: targetUser
+        }));
+
+        ws.send(JSON.stringify({
+          type: "control-revoked",
+          to: targetUser
+        }));
+      }
+
+      setStatus("Share stopped");
+      logControlLine("PIPELINE local share stopped");
     }
 
     function createPeerConnection() {
@@ -627,7 +700,7 @@
           targetUser = name;
           hasControlPermission = false;
           controlTargetUser = "";
-          shareButton.disabled = false;
+          shareButton.disabled = localShareActive;
           setStatus(`Selected: ${name}`);
           viewerMeta.textContent = `Ready for ${name}`;
           renderParticipants();
@@ -659,6 +732,10 @@
         button: typeof event.button === "number" ? event.button : 0
       }));
       logControlLine(`SEND mouse ${event.type} -> ${controlTargetUser}`);
+
+      if (event.type === "contextmenu") {
+        event.preventDefault();
+      }
     }
 
     function forwardKeyboardEvent(event) {
@@ -683,6 +760,20 @@
       }));
       logControlLine(`SEND keyboard ${event.type} -> ${event.key}`);
 
+      event.preventDefault();
+    }
+
+    function forwardScrollEvent(event) {
+      if (!hasControlPermission || !controlTargetUser || !remoteStreamActive) {
+        return;
+      }
+
+      ws.send(JSON.stringify({
+        type: "remote-scroll",
+        to: controlTargetUser,
+        deltaY: event.deltaY
+      }));
+      logControlLine(`SEND scroll -> ${event.deltaY}`);
       event.preventDefault();
     }
 
