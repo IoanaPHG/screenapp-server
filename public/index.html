@@ -295,16 +295,11 @@
       <input id="roomId" value="sedinta-1" />
 
       <button id="connectButton" class="primary">Connect</button>
-      <button id="shareButton" class="secondary" disabled>Share Screen</button>
+      <button id="shareButton" class="secondary" disabled>Start Session</button>
       <button id="stopShareButton" class="secondary" disabled>Stop Share</button>
 
-      <label class="toggle" for="allowRemoteControl">
-        <input id="allowRemoteControl" type="checkbox" />
-        <span>Allow remote control</span>
-      </label>
-
       <div id="status" class="status">Not connected</div>
-      <div id="desktopNotice" class="notice">Remote control works best in the Electron desktop app.</div>
+      <div id="desktopNotice" class="notice">Desktop app mode: screen share and remote control start together.</div>
 
       <div class="sectionTitle">Online Now</div>
       <div id="participants" class="participants">
@@ -345,7 +340,6 @@
     const connectButton = document.getElementById("connectButton");
     const shareButton = document.getElementById("shareButton");
     const stopShareButton = document.getElementById("stopShareButton");
-    const allowRemoteControlCheckbox = document.getElementById("allowRemoteControl");
     const statusText = document.getElementById("status");
     const screenVideo = document.getElementById("screenVideo");
     const logs = document.getElementById("logs");
@@ -367,18 +361,16 @@
     let controlTargetUser = "";
     let acceptedControllerUser = "";
     let hasControlPermission = false;
-    let allowRemoteControl = false;
     let remoteStreamActive = false;
     let lastMouseSentAt = 0;
     let localShareActive = false;
 
     if (isDesktopApp) {
       modeBadge.textContent = "Desktop";
-      desktopNotice.textContent = "Desktop mode active. Remote control is enabled here.";
+      desktopNotice.textContent = "Desktop mode active. Start Session enables screen share and control together.";
     } else {
       modeBadge.textContent = "Web";
       modeBadge.classList.add("web");
-      allowRemoteControlCheckbox.disabled = true;
       desktopNotice.textContent = "Web mode is viewer-first. Run the Electron app for real remote control.";
     }
 
@@ -404,7 +396,6 @@
     function connect() {
       username = usernameInput.value.trim();
       roomId = roomIdInput.value.trim() || "main";
-      allowRemoteControl = allowRemoteControlCheckbox.checked;
 
       if (!username) {
         setStatus("Enter your name.");
@@ -567,8 +558,6 @@
         return;
       }
 
-      allowRemoteControl = allowRemoteControlCheckbox.checked;
-
       try {
         logControlLine(`PIPELINE share start to ${targetUser}`);
         localStream = await navigator.mediaDevices.getDisplayMedia({
@@ -598,21 +587,14 @@
           type: "offer",
           to: targetUser,
           offer,
-          allowRemoteControl
+          allowRemoteControl: true
         }));
         logControlLine(`SIGNAL offer sent to ${targetUser}`);
 
-        setStatus(
-          allowRemoteControl
-            ? `Sharing to ${targetUser} with control`
-            : `Sharing to ${targetUser}`
-        );
-
-        if (allowRemoteControl) {
-          hasControlPermission = true;
-          controlTargetUser = targetUser;
-          logControlLine(`CONTROL auto-enabled for ${targetUser}`);
-        }
+        hasControlPermission = true;
+        controlTargetUser = targetUser;
+        setStatus(`Session started with ${targetUser}`);
+        logControlLine(`CONTROL auto-enabled for ${targetUser}`);
       } catch (error) {
         logLine(`Share failed: ${error.message}`);
         setStatus("Screen share failed.");
