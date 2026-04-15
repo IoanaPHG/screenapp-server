@@ -264,11 +264,10 @@
         <div class="muted">Desktop remote support</div>
       </div>
 
-      <div class="label">Rooms</div>
-      <div id="rooms" class="roomGrid"></div>
+      <div class="label">Session</div>
+      <div class="notice">Everyone joins the same ScreenApp room. Click a participant to request access.</div>
 
-      <button id="connectButton" class="primary">Join Room</button>
-      <button id="requestAccessButton" class="secondary" disabled>Request Access</button>
+      <button id="connectButton" class="primary">Join</button>
       <button id="stopSessionButton" class="danger" disabled>Stop Session</button>
 
       <div id="status" class="status">Choose a room and connect.</div>
@@ -282,7 +281,7 @@
       <div class="topbar">
         <div>
           <div class="topTitle">Remote Screen</div>
-          <div id="viewerMeta" class="topMeta">Select a room, connect, then request access to a participant.</div>
+          <div id="viewerMeta" class="topMeta">Join, then click a participant to request access.</div>
         </div>
         <div id="modeBadge" class="badge">Desktop</div>
       </div>
@@ -306,13 +305,9 @@
   </main>
 
   <script>
-    const PREDEFINED_ROOMS = [
-      { id: "sedinte", label: "Sedinte" },
-      { id: "sharescreen", label: "Share Screen" }
-    ];
+    const SCREENAPP_ROOM = "screenapp";
 
     const connectButton = document.getElementById("connectButton");
-    const requestAccessButton = document.getElementById("requestAccessButton");
     const stopSessionButton = document.getElementById("stopSessionButton");
     const statusText = document.getElementById("status");
     const screenVideo = document.getElementById("screenVideo");
@@ -324,7 +319,6 @@
     const modeBadge = document.getElementById("modeBadge");
     const desktopNotice = document.getElementById("desktopNotice");
     const userNameLabel = document.getElementById("userName");
-    const roomsBox = document.getElementById("rooms");
 
     const isDesktopApp = Boolean(window.screenAppDesktop?.isElectronDesktop);
 
@@ -332,8 +326,7 @@
     let pc = null;
     let localStream = null;
     let username = "";
-    let selectedRoomId = PREDEFINED_ROOMS[0].id;
-    let joinedRoomId = "";
+    let joinedRoomId = SCREENAPP_ROOM;
     let targetUser = "";
     let participants = [];
     let localShareActive = false;
@@ -346,9 +339,8 @@
     init();
 
     function init() {
-      username = getOrAskUsername();
+      username = askUsername();
       userNameLabel.textContent = username;
-      renderRooms();
       renderParticipants();
 
       if (isDesktopApp) {
@@ -369,7 +361,6 @@
     }
 
     connectButton.addEventListener("click", connectToRoom);
-    requestAccessButton.addEventListener("click", requestAccess);
     stopSessionButton.addEventListener("click", stopSession);
     screenVideo.addEventListener("mousemove", forwardMouseEvent);
     screenVideo.addEventListener("mousedown", forwardMouseEvent);
@@ -381,54 +372,24 @@
     window.addEventListener("keydown", forwardKeyboardEvent);
     window.addEventListener("keyup", forwardKeyboardEvent);
 
-    function getOrAskUsername() {
-      const saved = localStorage.getItem("screenapp_username");
-
-      if (saved) {
-        return saved;
-      }
-
+    function askUsername() {
       let name = "";
 
       while (!name) {
         name = prompt("Cum te numesti?")?.trim() || "";
       }
 
-      localStorage.setItem("screenapp_username", name);
       return name;
     }
 
-    function renderRooms() {
-      roomsBox.innerHTML = "";
-
-      PREDEFINED_ROOMS.forEach((room) => {
-        const button = document.createElement("button");
-        button.textContent = room.label;
-        button.className = room.id === selectedRoomId ? "roomButton active" : "roomButton";
-        button.addEventListener("click", () => {
-          selectedRoomId = room.id;
-          renderRooms();
-          setStatus(`Selected room: ${room.label}`);
-        });
-        roomsBox.appendChild(button);
-      });
-    }
-
     function connectToRoom() {
-      if (ws && ws.readyState === WebSocket.OPEN && joinedRoomId === selectedRoomId) {
-        setStatus(`Already connected to ${selectedRoomId}`);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        setStatus("Already connected");
         return;
       }
-
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.close();
-      }
-
-      joinedRoomId = selectedRoomId;
       targetUser = "";
       participants = [];
       renderParticipants();
-      requestAccessButton.disabled = true;
 
       const protocol = location.protocol === "https:" ? "wss" : "ws";
       ws = new WebSocket(`${protocol}://${location.host}`);
@@ -441,15 +402,14 @@
           roomId: joinedRoomId
         }));
 
-        setStatus(`Connected to room ${joinedRoomId}`);
-        viewerMeta.textContent = `Room: ${joinedRoomId}. Choose a participant and request access.`;
-        logLine(`Joined room ${joinedRoomId}`);
+        setStatus("Connected");
+        viewerMeta.textContent = "Click a participant to request access.";
+        logLine(`Joined ${joinedRoomId}`);
         logControlLine(`PIPELINE joined ${joinedRoomId} as ${username}`);
       });
 
       ws.addEventListener("close", () => {
         setStatus("Connection closed");
-        requestAccessButton.disabled = true;
         logLine("WebSocket closed.");
         logControlLine("PIPELINE WebSocket closed");
       });
@@ -594,27 +554,6 @@
       };
     }
 
-    function requestAccess() {
-      if (!ws || ws.readyState !== WebSocket.OPEN) {
-        setStatus("Join a room first.");
-        return;
-      }
-
-      if (!targetUser) {
-        setStatus("Choose a participant first.");
-        return;
-      }
-
-      ws.send(JSON.stringify({
-        type: "access-request",
-        to: targetUser
-      }));
-
-      setStatus(`Access request sent to ${targetUser}`);
-      viewerMeta.textContent = `Waiting for ${targetUser} to accept`;
-      logControlLine(`ACCESS request sent to ${targetUser}`);
-    }
-
     async function startSessionForRequester(requester) {
       if (!isDesktopApp) {
         setStatus("Use Electron to start remote control sessions.");
@@ -703,7 +642,7 @@
       placeholder.style.display = "flex";
       viewerMeta.textContent = targetUser
         ? `Ready for ${targetUser}`
-        : "Select a participant and request access.";
+        : "Click a participant to request access.";
       setStatus(message);
       pc = createPeerConnection();
     }
@@ -740,7 +679,6 @@
     function renderParticipants() {
       if (participants.length === 0) {
         participantsBox.innerHTML = '<div class="empty">Nobody else is connected in this room.</div>';
-        requestAccessButton.disabled = true;
         return;
       }
 
@@ -752,9 +690,15 @@
         button.className = name === targetUser ? "participantButton active" : "participantButton";
         button.addEventListener("click", () => {
           targetUser = name;
-          requestAccessButton.disabled = false;
-          setStatus(`Selected ${name}`);
-          viewerMeta.textContent = `Ready to request access from ${name}`;
+          setStatus(`Request sent to ${name}`);
+          viewerMeta.textContent = `Waiting for ${name} to accept`;
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              type: "access-request",
+              to: name
+            }));
+            logControlLine(`ACCESS request sent to ${name}`);
+          }
           renderParticipants();
         });
         participantsBox.appendChild(button);
