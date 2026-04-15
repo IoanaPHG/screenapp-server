@@ -8,14 +8,15 @@
     :root {
       --bg: #f3f4f6;
       --panel: #ffffff;
-      --panel-soft: #f8fafc;
+      --soft: #f8fafc;
+      --line: #d1d5db;
       --text: #111827;
       --muted: #6b7280;
-      --line: #d1d5db;
       --accent: #ea580c;
       --accent-dark: #c2410c;
-      --success: #15803d;
-      --danger: #b91c1c;
+      --dark: #111827;
+      --success: #166534;
+      --warning: #9a3412;
     }
 
     * {
@@ -44,43 +45,68 @@
     .brand {
       font-size: 28px;
       font-weight: 700;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
-    .sectionTitle {
+    .label {
       font-size: 12px;
       font-weight: 700;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin: 18px 0 10px;
+      margin-bottom: 10px;
     }
 
-    label {
-      display: block;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
+    .userCard,
+    .status,
+    .notice {
       border: 1px solid var(--line);
-      border-radius: 10px;
-      background: #fff;
-      font: inherit;
-      margin-bottom: 12px;
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--soft);
+      margin-bottom: 14px;
+    }
+
+    .userName {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .roomGrid,
+    .participants {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     button {
       width: 100%;
       border: 0;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 12px 14px;
       font: inherit;
       font-weight: 600;
       cursor: pointer;
+    }
+
+    .roomButton,
+    .participantButton,
+    .secondary {
+      background: var(--soft);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .roomButton.active,
+    .participantButton.active {
+      background: #fff7ed;
+      border-color: var(--accent);
+      color: var(--accent-dark);
     }
 
     .primary {
@@ -88,8 +114,8 @@
       color: #fff;
     }
 
-    .secondary {
-      background: #111827;
+    .danger {
+      background: var(--dark);
       color: #fff;
       margin-top: 10px;
     }
@@ -99,58 +125,15 @@
       cursor: not-allowed;
     }
 
-    .toggle {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      margin-top: 12px;
-      color: var(--text);
-    }
-
-    .toggle input {
-      width: 16px;
-      height: 16px;
-      margin: 0;
-    }
-
     .status {
-      margin-top: 14px;
-      padding: 10px 12px;
-      border-radius: 10px;
       background: #ecfdf5;
       color: var(--success);
-      font-size: 14px;
-      min-height: 42px;
+      min-height: 48px;
     }
 
-    .participants {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .participant {
-      text-align: left;
-      background: var(--panel-soft);
-      color: var(--text);
-      border: 1px solid var(--line);
-    }
-
-    .participant.active {
-      border-color: var(--accent);
+    .notice {
+      color: var(--warning);
       background: #fff7ed;
-      color: var(--accent-dark);
-    }
-
-    .empty {
-      padding: 12px;
-      border: 1px dashed var(--line);
-      border-radius: 10px;
-      color: var(--muted);
-      font-size: 14px;
-      background: var(--panel-soft);
     }
 
     .main {
@@ -162,50 +145,45 @@
 
     .topbar {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 12px;
+      padding: 14px 16px;
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 14px 16px;
     }
 
-    .topbarTitle {
+    .topTitle {
       font-size: 18px;
       font-weight: 700;
     }
 
-    .topbarMeta {
+    .topMeta {
       color: var(--muted);
       font-size: 14px;
     }
 
-    .modeBadge {
+    .badge {
       padding: 8px 10px;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
       background: #dbeafe;
       color: #1d4ed8;
-    }
-
-    .modeBadge.web {
-      background: #fee2e2;
-      color: var(--danger);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .screen {
-      background: #0f172a;
+      position: relative;
+      min-height: 520px;
       border-radius: 16px;
       overflow: hidden;
-      min-height: 520px;
+      background: #0f172a;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
     }
 
     video {
@@ -226,21 +204,17 @@
       pointer-events: none;
     }
 
-    .logs {
+    .logGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .logCard {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 12px;
-      color: var(--muted);
-      font-size: 13px;
-      white-space: pre-wrap;
-      min-height: 110px;
-    }
-
-    .logGrid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: 1fr 1fr;
     }
 
     .logTitle {
@@ -252,14 +226,11 @@
       margin-bottom: 8px;
     }
 
-    .notice {
-      margin-top: 12px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: #fff7ed;
-      color: var(--accent-dark);
+    .logBody {
+      white-space: pre-wrap;
       font-size: 13px;
-      border: 1px solid #fed7aa;
+      color: var(--muted);
+      min-height: 110px;
     }
 
     @media (max-width: 980px) {
@@ -287,102 +258,119 @@
     <aside class="sidebar">
       <div class="brand">ScreenApp</div>
 
-      <div class="sectionTitle">Your Session</div>
-      <label for="username">Your name</label>
-      <input id="username" placeholder="ex: ioana" />
-
-      <label for="roomId">Room</label>
-      <input id="roomId" value="sedinta-1" />
-
-      <button id="connectButton" class="primary">Connect</button>
-      <button id="shareButton" class="secondary" disabled>Start Session</button>
-      <button id="stopShareButton" class="secondary" disabled>Stop Share</button>
-
-      <div id="status" class="status">Not connected</div>
-      <div id="desktopNotice" class="notice">Desktop app mode: screen share and remote control start together.</div>
-
-      <div class="sectionTitle">Online Now</div>
-      <div id="participants" class="participants">
-        <div class="empty">No one else is in this room yet.</div>
+      <div class="label">You</div>
+      <div class="userCard">
+        <div id="userName" class="userName">-</div>
+        <div class="muted">Desktop remote support</div>
       </div>
+
+      <div class="label">Rooms</div>
+      <div id="rooms" class="roomGrid"></div>
+
+      <button id="connectButton" class="primary">Join Room</button>
+      <button id="requestAccessButton" class="secondary" disabled>Request Access</button>
+      <button id="stopSessionButton" class="danger" disabled>Stop Session</button>
+
+      <div id="status" class="status">Choose a room and connect.</div>
+      <div id="desktopNotice" class="notice">In Electron, accepted requests start screen share and control together.</div>
+
+      <div class="label">Participants</div>
+      <div id="participants" class="participants"></div>
     </aside>
 
     <section class="main">
       <div class="topbar">
         <div>
-          <div class="topbarTitle">Remote Screen</div>
-          <div id="viewerMeta" class="topbarMeta">Select a participant and start sharing.</div>
+          <div class="topTitle">Remote Screen</div>
+          <div id="viewerMeta" class="topMeta">Select a room, connect, then request access to a participant.</div>
         </div>
-        <div id="modeBadge" class="modeBadge">Desktop</div>
+        <div id="modeBadge" class="badge">Desktop</div>
       </div>
 
       <div class="screen">
         <video id="screenVideo" autoplay playsinline muted></video>
-        <div id="placeholder" class="placeholder">Waiting for screen share...</div>
+        <div id="placeholder" class="placeholder">Waiting for a remote session...</div>
       </div>
 
       <div class="logGrid">
-        <div class="logs">
+        <div class="logCard">
           <div class="logTitle">App Log</div>
-          <div id="logs">Activity log</div>
+          <div id="logs" class="logBody">Activity log</div>
         </div>
-        <div class="logs">
+        <div class="logCard">
           <div class="logTitle">Control Pipeline</div>
-          <div id="controlLogs">Waiting for Electron control logs...</div>
+          <div id="controlLogs" class="logBody">Waiting for session logs...</div>
         </div>
       </div>
     </section>
   </main>
 
   <script>
-    const usernameInput = document.getElementById("username");
-    const roomIdInput = document.getElementById("roomId");
+    const PREDEFINED_ROOMS = [
+      { id: "sedinte", label: "Sedinte" },
+      { id: "sharescreen", label: "Share Screen" }
+    ];
+
     const connectButton = document.getElementById("connectButton");
-    const shareButton = document.getElementById("shareButton");
-    const stopShareButton = document.getElementById("stopShareButton");
+    const requestAccessButton = document.getElementById("requestAccessButton");
+    const stopSessionButton = document.getElementById("stopSessionButton");
     const statusText = document.getElementById("status");
     const screenVideo = document.getElementById("screenVideo");
+    const participantsBox = document.getElementById("participants");
     const logs = document.getElementById("logs");
     const controlLogs = document.getElementById("controlLogs");
-    const participantsBox = document.getElementById("participants");
-    const viewerMeta = document.getElementById("viewerMeta");
     const placeholder = document.getElementById("placeholder");
+    const viewerMeta = document.getElementById("viewerMeta");
     const modeBadge = document.getElementById("modeBadge");
     const desktopNotice = document.getElementById("desktopNotice");
+    const userNameLabel = document.getElementById("userName");
+    const roomsBox = document.getElementById("rooms");
+
     const isDesktopApp = Boolean(window.screenAppDesktop?.isElectronDesktop);
 
     let ws = null;
     let pc = null;
     let localStream = null;
     let username = "";
-    let roomId = "";
+    let selectedRoomId = PREDEFINED_ROOMS[0].id;
+    let joinedRoomId = "";
     let targetUser = "";
     let participants = [];
+    let localShareActive = false;
+    let remoteStreamActive = false;
+    let lastMouseSentAt = 0;
     let controlTargetUser = "";
     let acceptedControllerUser = "";
     let hasControlPermission = false;
-    let remoteStreamActive = false;
-    let lastMouseSentAt = 0;
-    let localShareActive = false;
 
-    if (isDesktopApp) {
-      modeBadge.textContent = "Desktop";
-      desktopNotice.textContent = "Desktop mode active. Start Session enables screen share and control together.";
-    } else {
-      modeBadge.textContent = "Web";
-      modeBadge.classList.add("web");
-      desktopNotice.textContent = "Web mode is viewer-first. Run the Electron app for real remote control.";
+    init();
+
+    function init() {
+      username = getOrAskUsername();
+      userNameLabel.textContent = username;
+      renderRooms();
+      renderParticipants();
+
+      if (isDesktopApp) {
+        modeBadge.textContent = "Desktop";
+        desktopNotice.textContent = "Desktop mode active. Approved requests start share and control together.";
+      } else {
+        modeBadge.textContent = "Web";
+        modeBadge.style.background = "#fee2e2";
+        modeBadge.style.color = "#b91c1c";
+        desktopNotice.textContent = "Web mode is for viewing. Use Electron on both sides for stable control.";
+      }
+
+      if (window.screenAppDesktop?.onDesktopLog) {
+        window.screenAppDesktop.onDesktopLog((message) => {
+          logControlLine(`DESKTOP ${message}`);
+        });
+      }
     }
 
-    if (window.screenAppDesktop?.onDesktopLog) {
-      window.screenAppDesktop.onDesktopLog((message) => {
-        logControlLine(`DESKTOP ${message}`);
-      });
-    }
-
-    connectButton.addEventListener("click", connect);
-    shareButton.addEventListener("click", shareScreen);
-    stopShareButton.addEventListener("click", stopShare);
+    connectButton.addEventListener("click", connectToRoom);
+    requestAccessButton.addEventListener("click", requestAccess);
+    stopSessionButton.addEventListener("click", stopSession);
     screenVideo.addEventListener("mousemove", forwardMouseEvent);
     screenVideo.addEventListener("mousedown", forwardMouseEvent);
     screenVideo.addEventListener("mouseup", forwardMouseEvent);
@@ -393,40 +381,75 @@
     window.addEventListener("keydown", forwardKeyboardEvent);
     window.addEventListener("keyup", forwardKeyboardEvent);
 
-    function connect() {
-      username = usernameInput.value.trim();
-      roomId = roomIdInput.value.trim() || "main";
+    function getOrAskUsername() {
+      const saved = localStorage.getItem("screenapp_username");
 
-      if (!username) {
-        setStatus("Enter your name.");
+      if (saved) {
+        return saved;
+      }
+
+      let name = "";
+
+      while (!name) {
+        name = prompt("Cum te numesti?")?.trim() || "";
+      }
+
+      localStorage.setItem("screenapp_username", name);
+      return name;
+    }
+
+    function renderRooms() {
+      roomsBox.innerHTML = "";
+
+      PREDEFINED_ROOMS.forEach((room) => {
+        const button = document.createElement("button");
+        button.textContent = room.label;
+        button.className = room.id === selectedRoomId ? "roomButton active" : "roomButton";
+        button.addEventListener("click", () => {
+          selectedRoomId = room.id;
+          renderRooms();
+          setStatus(`Selected room: ${room.label}`);
+        });
+        roomsBox.appendChild(button);
+      });
+    }
+
+    function connectToRoom() {
+      if (ws && ws.readyState === WebSocket.OPEN && joinedRoomId === selectedRoomId) {
+        setStatus(`Already connected to ${selectedRoomId}`);
         return;
       }
 
       if (ws && ws.readyState === WebSocket.OPEN) {
-        logLine("Already connected.");
-        return;
+        ws.close();
       }
+
+      joinedRoomId = selectedRoomId;
+      targetUser = "";
+      participants = [];
+      renderParticipants();
+      requestAccessButton.disabled = true;
 
       const protocol = location.protocol === "https:" ? "wss" : "ws";
       ws = new WebSocket(`${protocol}://${location.host}`);
       pc = createPeerConnection();
 
       ws.addEventListener("open", () => {
-        setStatus(`Connected as ${username}`);
-        logLine("WebSocket connected.");
-        logControlLine(`PIPELINE Join room ${roomId} as ${username}`);
-
         ws.send(JSON.stringify({
           type: "join",
           username,
-          roomId
+          roomId: joinedRoomId
         }));
+
+        setStatus(`Connected to room ${joinedRoomId}`);
+        viewerMeta.textContent = `Room: ${joinedRoomId}. Choose a participant and request access.`;
+        logLine(`Joined room ${joinedRoomId}`);
+        logControlLine(`PIPELINE joined ${joinedRoomId} as ${username}`);
       });
 
       ws.addEventListener("close", () => {
         setStatus("Connection closed");
-        shareButton.disabled = true;
-        stopShareButton.disabled = true;
+        requestAccessButton.disabled = true;
         logLine("WebSocket closed.");
         logControlLine("PIPELINE WebSocket closed");
       });
@@ -453,10 +476,49 @@
             return;
           }
 
+          if (data.type === "access-request") {
+            const accepted = confirm(`${data.from} wants access to your screen. Allow?`);
+
+            if (!accepted) {
+              ws.send(JSON.stringify({
+                type: "access-denied",
+                to: data.from
+              }));
+              setStatus(`Access denied for ${data.from}`);
+              logControlLine(`ACCESS denied for ${data.from}`);
+              return;
+            }
+
+            ws.send(JSON.stringify({
+              type: "access-approved",
+              to: data.from
+            }));
+
+            setStatus(`Access approved for ${data.from}`);
+            logControlLine(`ACCESS approved for ${data.from}`);
+            await startSessionForRequester(data.from);
+            return;
+          }
+
+          if (data.type === "access-approved") {
+            targetUser = data.from;
+            setStatus(`Access approved by ${data.from}. Waiting for stream...`);
+            viewerMeta.textContent = `Waiting for ${data.from} to share the screen`;
+            logControlLine(`ACCESS approved by ${data.from}`);
+            return;
+          }
+
+          if (data.type === "access-denied") {
+            setStatus(`Access denied by ${data.from}`);
+            logControlLine(`ACCESS denied by ${data.from}`);
+            return;
+          }
+
           if (data.type === "offer") {
             targetUser = data.from;
+            controlTargetUser = data.from;
+            hasControlPermission = Boolean(data.allowRemoteControl);
             pc = createPeerConnection();
-            acceptedControllerUser = data.allowRemoteControl ? data.from : "";
 
             await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
             logControlLine(`SIGNAL offer from ${data.from}`);
@@ -489,11 +551,9 @@
             return;
           }
 
-          if (data.type === "control-granted") {
-            hasControlPermission = true;
-            controlTargetUser = data.from;
-            setStatus(`Control active for ${data.from}`);
-            logControlLine(`CONTROL granted by ${data.from}`);
+          if (data.type === "stop-share") {
+            resetSessionState(`Session ended by ${data.from}`);
+            logControlLine(`PIPELINE session stopped by ${data.from}`);
             return;
           }
 
@@ -503,19 +563,6 @@
             acceptedControllerUser = "";
             setStatus(`Control stopped by ${data.from}`);
             logControlLine(`CONTROL revoked by ${data.from}`);
-            return;
-          }
-
-          if (data.type === "stop-share") {
-            remoteStreamActive = false;
-            hasControlPermission = false;
-            controlTargetUser = "";
-            acceptedControllerUser = "";
-            screenVideo.srcObject = null;
-            placeholder.style.display = "flex";
-            viewerMeta.textContent = "Remote session ended";
-            setStatus(`Share stopped by ${data.from}`);
-            logControlLine(`PIPELINE share stopped by ${data.from}`);
             return;
           }
 
@@ -547,79 +594,86 @@
       };
     }
 
-    async function shareScreen() {
+    function requestAccess() {
       if (!ws || ws.readyState !== WebSocket.OPEN) {
-        setStatus("Connect first.");
+        setStatus("Join a room first.");
         return;
       }
 
       if (!targetUser) {
-        setStatus("Select a participant first.");
+        setStatus("Choose a participant first.");
         return;
       }
 
-      try {
-        logControlLine(`PIPELINE share start to ${targetUser}`);
-        localStream = await navigator.mediaDevices.getDisplayMedia({
-          video: true
-        });
+      ws.send(JSON.stringify({
+        type: "access-request",
+        to: targetUser
+      }));
 
-        screenVideo.srcObject = localStream;
-        placeholder.style.display = "none";
-        viewerMeta.textContent = `Sharing to ${targetUser}`;
-        localShareActive = true;
-        stopShareButton.disabled = false;
-
-        localStream.getTracks().forEach((track) => {
-          pc.addTrack(track, localStream);
-        });
-
-        localStream.getTracks().forEach((track) => {
-          track.onended = () => {
-            stopShare();
-          };
-        });
-
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-
-        ws.send(JSON.stringify({
-          type: "offer",
-          to: targetUser,
-          offer,
-          allowRemoteControl: true
-        }));
-        logControlLine(`SIGNAL offer sent to ${targetUser}`);
-
-        hasControlPermission = true;
-        controlTargetUser = targetUser;
-        setStatus(`Session started with ${targetUser}`);
-        logControlLine(`CONTROL auto-enabled for ${targetUser}`);
-      } catch (error) {
-        logLine(`Share failed: ${error.message}`);
-        setStatus("Screen share failed.");
-        logControlLine(`PIPELINE share failed: ${error.message}`);
-      }
+      setStatus(`Access request sent to ${targetUser}`);
+      viewerMeta.textContent = `Waiting for ${targetUser} to accept`;
+      logControlLine(`ACCESS request sent to ${targetUser}`);
     }
 
-    function stopShare() {
-      if (!localShareActive && !localStream) {
+    async function startSessionForRequester(requester) {
+      if (!isDesktopApp) {
+        setStatus("Use Electron to start remote control sessions.");
+        return;
+      }
+
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        setStatus("WebSocket not connected.");
+        return;
+      }
+
+      targetUser = requester;
+      acceptedControllerUser = requester;
+      hasControlPermission = false;
+      controlTargetUser = "";
+
+      if (localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
+      }
+
+      localStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true
+      });
+
+      localShareActive = true;
+      stopSessionButton.disabled = false;
+      screenVideo.srcObject = localStream;
+      placeholder.style.display = "none";
+      viewerMeta.textContent = `Sharing to ${requester}`;
+
+      pc = createPeerConnection();
+
+      localStream.getTracks().forEach((track) => {
+        pc.addTrack(track, localStream);
+        track.onended = () => stopSession();
+      });
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      ws.send(JSON.stringify({
+        type: "offer",
+        to: requester,
+        offer,
+        allowRemoteControl: true
+      }));
+
+      setStatus(`Session started with ${requester}`);
+      logControlLine(`PIPELINE session started for ${requester}`);
+    }
+
+    function stopSession() {
+      if (!localShareActive && !remoteStreamActive && !localStream) {
         return;
       }
 
       if (localStream) {
         localStream.getTracks().forEach((track) => track.stop());
       }
-
-      localStream = null;
-      localShareActive = false;
-      hasControlPermission = false;
-      remoteStreamActive = false;
-      controlTargetUser = "";
-      screenVideo.srcObject = null;
-      placeholder.style.display = "flex";
-      viewerMeta.textContent = targetUser ? `Ready for ${targetUser}` : "Select a participant and start sharing.";
-      stopShareButton.disabled = true;
 
       if (ws && ws.readyState === WebSocket.OPEN && targetUser) {
         ws.send(JSON.stringify({
@@ -633,8 +687,25 @@
         }));
       }
 
-      setStatus("Share stopped");
-      logControlLine("PIPELINE local share stopped");
+      resetSessionState("Session stopped");
+      logControlLine("PIPELINE local session stopped");
+    }
+
+    function resetSessionState(message) {
+      localStream = null;
+      localShareActive = false;
+      remoteStreamActive = false;
+      hasControlPermission = false;
+      controlTargetUser = "";
+      acceptedControllerUser = "";
+      stopSessionButton.disabled = true;
+      screenVideo.srcObject = null;
+      placeholder.style.display = "flex";
+      viewerMeta.textContent = targetUser
+        ? `Ready for ${targetUser}`
+        : "Select a participant and request access.";
+      setStatus(message);
+      pc = createPeerConnection();
     }
 
     function createPeerConnection() {
@@ -644,8 +715,9 @@
         screenVideo.srcObject = event.streams[0];
         placeholder.style.display = "none";
         viewerMeta.textContent = `Viewing ${targetUser}`;
-        setStatus(`Stream from ${targetUser}`);
         remoteStreamActive = true;
+        stopSessionButton.disabled = false;
+        setStatus(`Remote screen from ${targetUser}`);
         logControlLine(`PIPELINE remote stream attached from ${targetUser}`);
       };
 
@@ -667,8 +739,8 @@
 
     function renderParticipants() {
       if (participants.length === 0) {
-        participantsBox.innerHTML = '<div class="empty">No one else is in this room yet.</div>';
-        shareButton.disabled = true;
+        participantsBox.innerHTML = '<div class="empty">Nobody else is connected in this room.</div>';
+        requestAccessButton.disabled = true;
         return;
       }
 
@@ -677,14 +749,12 @@
       participants.forEach((name) => {
         const button = document.createElement("button");
         button.textContent = name;
-        button.className = name === targetUser ? "participant active" : "participant";
+        button.className = name === targetUser ? "participantButton active" : "participantButton";
         button.addEventListener("click", () => {
           targetUser = name;
-          hasControlPermission = false;
-          controlTargetUser = "";
-          shareButton.disabled = localShareActive;
-          setStatus(`Selected: ${name}`);
-          viewerMeta.textContent = `Ready for ${name}`;
+          requestAccessButton.disabled = false;
+          setStatus(`Selected ${name}`);
+          viewerMeta.textContent = `Ready to request access from ${name}`;
           renderParticipants();
         });
         participantsBox.appendChild(button);
@@ -741,7 +811,6 @@
         metaKey: event.metaKey
       }));
       logControlLine(`SEND keyboard ${event.type} -> ${event.key}`);
-
       event.preventDefault();
     }
 
