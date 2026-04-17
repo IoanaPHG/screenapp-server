@@ -58,7 +58,7 @@
       if(window.screenAppDesktop?.onDesktopLog){window.screenAppDesktop.onDesktopLog(message=>logControlLine("DESKTOP "+message))}
       els.connectButton.addEventListener("click",connectToRoom);els.stopSessionButton.addEventListener("click",stopSession);els.saveNameButton.addEventListener("click",handleNameSubmit);els.approveRequestButton.addEventListener("click",approveIncomingRequest);els.denyRequestButton.addEventListener("click",denyIncomingRequest);
       els.nameInput.addEventListener("keydown",e=>{if(e.key==="Enter")handleNameSubmit()});
-      ["mousemove","mousedown","mouseup","click","dblclick","contextmenu"].forEach(type=>els.screenVideo.addEventListener(type,forwardMouseEvent));
+      ["mousemove","mousedown","mouseup"].forEach(type=>els.screenVideo.addEventListener(type,forwardMouseEvent));
       els.screenVideo.addEventListener("wheel",forwardScrollEvent,{passive:false});window.addEventListener("keydown",forwardKeyboardEvent);window.addEventListener("keyup",forwardKeyboardEvent);els.nameInput.focus();
     }
 
@@ -148,9 +148,31 @@
     function forwardMouseEvent(event){
       if(!hasControlPermission||!controlTargetUser||!remoteStreamActive||!isConnected())return;
       if(event.type==="mousemove"&&Date.now()-lastMouseSentAt<30)return;lastMouseSentAt=Date.now();
-      const rect=els.screenVideo.getBoundingClientRect();
-      ws.send(JSON.stringify({type:"remote-mouse",to:controlTargetUser,eventType:event.type,x:Math.round(event.clientX-rect.left),y:Math.round(event.clientY-rect.top),width:Math.round(rect.width),height:Math.round(rect.height),button:typeof event.button==="number"?event.button:0}));
-      logControlLine("SEND mouse "+event.type+" -> "+controlTargetUser);if(event.type==="contextmenu")event.preventDefault();
+      const videoMetrics=getRenderedVideoMetrics();
+      if(!videoMetrics)return;
+
+      const contentX=event.clientX-videoMetrics.left;
+      const contentY=event.clientY-videoMetrics.top;
+      const normalizedX=clamp(contentX/videoMetrics.width,0,1);
+      const normalizedY=clamp(contentY/videoMetrics.height,0,1);
+
+      if((event.type==="mousedown"||event.type==="mouseup")&&!isPointInsideRenderedVideo(contentX,contentY,videoMetrics)){
+        return;
+      }
+
+      ws.send(JSON.stringify({
+        type:"remote-mouse",
+        to:controlTargetUser,
+        eventType:event.type,
+        normalizedX,
+        normalizedY,
+        x:Math.round(contentX),
+        y:Math.round(contentY),
+        width:Math.round(videoMetrics.width),
+        height:Math.round(videoMetrics.height),
+        button:typeof event.button==="number"?event.button:0
+      }));
+      logControlLine("SEND mouse "+event.type+" -> "+controlTargetUser);
     }
 
     function forwardKeyboardEvent(event){
@@ -177,6 +199,42 @@
     function logControlLine(message){const time=new Date().toLocaleTimeString();els.controlLogs.textContent="["+time+"] "+message+"\n"+els.controlLogs.textContent}
     function escapeHtml(value){return value.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
     function toWebSocketUrl(baseUrl){if(baseUrl.startsWith("ws://")||baseUrl.startsWith("wss://"))return baseUrl;return baseUrl.replace(/^http:\/\//,"ws://").replace(/^https:\/\//,"wss://")}
+    function clamp(value,min,max){return Math.min(Math.max(value,min),max)}
+    function isPointInsideRenderedVideo(x,y,metrics){return x>=0&&y>=0&&x<=metrics.width&&y<=metrics.height}
+    function getRenderedVideoMetrics(){
+      const rect=els.screenVideo.getBoundingClientRect();
+      const videoWidth=els.screenVideo.videoWidth||0;
+      const videoHeight=els.screenVideo.videoHeight||0;
+
+      if(!rect.width||!rect.height){
+        return null;
+      }
+
+      if(!videoWidth||!videoHeight){
+        return {left:rect.left,top:rect.top,width:rect.width,height:rect.height};
+      }
+
+      const videoAspect=videoWidth/videoHeight;
+      const rectAspect=rect.width/rect.height;
+
+      if(videoAspect>rectAspect){
+        const height=rect.width/videoAspect;
+        return {
+          left:rect.left,
+          top:rect.top+((rect.height-height)/2),
+          width:rect.width,
+          height
+        };
+      }
+
+      const width=rect.height*videoAspect;
+      return {
+        left:rect.left+((rect.width-width)/2),
+        top:rect.top,
+        width,
+        height:rect.height
+      };
+    }
   </script>
 </body>
 </html>
