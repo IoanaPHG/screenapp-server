@@ -1,10 +1,11 @@
 const { app, BrowserWindow, desktopCapturer, ipcMain, session, shell } = require("electron");
 const path = require("path");
 const {
-  executeRemoteKeyboard,
-  executeRemoteMouse,
-  executeRemoteScroll
-} = require("./remote-control");
+  ensureNativeAgent,
+  fetchAgentState,
+  sendAgentCommand,
+  stopNativeAgent
+} = require("./agent-client");
 
 const APP_ENTRY = path.join(__dirname, "..", "public", "index.html");
 const windows = new Set();
@@ -70,6 +71,10 @@ app.whenReady().then(() => {
     { useSystemPicker: true }
   );
 
+  ensureNativeAgent().catch((error) => {
+    console.error("Nu s-a putut porni ScreenAppAgent:", error);
+  });
+
   createWindow();
 
   app.on("activate", () => {
@@ -83,7 +88,7 @@ ipcMain.handle("remote-control:mouse", async (event, payload) => {
   logDesktopEvent(`Mouse ${payload.eventType} -> ${payload.x},${payload.y}`);
 
   try {
-    const result = await executeRemoteMouse(payload);
+    const result = await sendAgentCommand("/mouse", payload);
     logDesktopEvent(`Mouse executed (${result.action})`);
     return result;
   } catch (error) {
@@ -96,7 +101,7 @@ ipcMain.handle("remote-control:keyboard", async (event, payload) => {
   logDesktopEvent(`Keyboard ${payload.eventType} -> ${payload.key}`);
 
   try {
-    const result = await executeRemoteKeyboard(payload);
+    const result = await sendAgentCommand("/keyboard", payload);
     logDesktopEvent(`Keyboard executed (${result.action})`);
     return result;
   } catch (error) {
@@ -109,7 +114,7 @@ ipcMain.handle("remote-control:scroll", async (event, payload) => {
   logDesktopEvent(`Scroll -> ${payload.deltaY}`);
 
   try {
-    const result = await executeRemoteScroll(payload);
+    const result = await sendAgentCommand("/scroll", payload);
     logDesktopEvent(`Scroll executed (${result.action})`);
     return result;
   } catch (error) {
@@ -118,7 +123,19 @@ ipcMain.handle("remote-control:scroll", async (event, payload) => {
   }
 });
 
+ipcMain.handle("remote-control:displays", async () => {
+  try {
+    const result = await fetchAgentState("/displays");
+    logDesktopEvent(`Displays loaded (${result.length})`);
+    return result;
+  } catch (error) {
+    logDesktopEvent(`Displays failed: ${error.message}`);
+    throw error;
+  }
+});
+
 app.on("window-all-closed", () => {
+  stopNativeAgent();
   if (process.platform !== "darwin") {
     app.quit();
   }

@@ -3,3 +3,6 @@ dist/
 out/
 release/
 *.log
+agent/**/bin/
+agent/**/obj/
+agent/publish/

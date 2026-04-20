@@ -5,11 +5,12 @@
   "private": true,
   "main": "electron/main.js",
   "scripts": {
+    "agent:publish": "C:\\Progra~1\\dotnet\\dotnet.exe publish .\\agent\\ScreenAppAgent\\ScreenAppAgent.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o .\\agent\\publish",
     "start": "node server.js",
     "desktop": "electron .",
-    "dist": "electron-builder --win nsis portable",
-    "dist:portable": "electron-builder --win portable",
-    "dist:setup": "electron-builder --win nsis",
+    "dist": "npm run agent:publish && electron-builder --win nsis portable",
+    "dist:portable": "npm run agent:publish && electron-builder --win portable",
+    "dist:setup": "npm run agent:publish && electron-builder --win nsis",
     "rebuild": "electron-rebuild"
   },
   "dependencies": {
@@ -30,6 +31,12 @@
       "public/**/*",
       "server.js",
       "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "agent/publish",
+        "to": "agent/publish"
+      }
     ],
     "win": {
       "signAndEditExecutable": false,

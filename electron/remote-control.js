@@ -71,8 +71,9 @@ async function executeRemoteMouse(payload) {
 
 async function executeRemoteKeyboard(payload) {
   const key = toNutKey(payload.key);
+  const modifiers = getModifierKeys(payload);
 
-  if (!key && payload.eventType === "keydown" && isPrintableKey(payload.key)) {
+  if (!key && payload.eventType === "keydown" && isPrintableKey(payload.key) && modifiers.length === 0) {
     await keyboard.type(payload.key);
     return { ok: true, simulated: true, action: `type:${payload.key}` };
   }
@@ -82,6 +83,10 @@ async function executeRemoteKeyboard(payload) {
   }
 
   if (payload.eventType === "keyup") {
+    if (!isModifierKey(payload.key) && modifiers.length > 0) {
+      return { ok: true, simulated: false, action: `skip-keyup:${payload.key}` };
+    }
+
     await keyboard.releaseKey(key);
     return { ok: true, simulated: true, action: `release:${payload.key}` };
   }
@@ -89,6 +94,14 @@ async function executeRemoteKeyboard(payload) {
   if (isModifierKey(payload.key)) {
     await keyboard.pressKey(key);
     return { ok: true, simulated: true, action: `press:${payload.key}` };
+  }
+
+  if (modifiers.length > 0) {
+    await keyboard.pressKey(...modifiers);
+    await keyboard.pressKey(key);
+    await keyboard.releaseKey(key);
+    await keyboard.releaseKey(...modifiers.slice().reverse());
+    return { ok: true, simulated: true, action: `shortcut:${payload.key}` };
   }
 
   await keyboard.type(key);
@@ -108,10 +121,19 @@ async function executeRemoteScroll(payload) {
 
 function toScreenPoint(payload) {
   const display = screen.getPrimaryDisplay();
-  const width = Math.max(payload.width || 1, 1);
-  const height = Math.max(payload.height || 1, 1);
-  const x = Math.round((payload.x / width) * display.size.width);
-  const y = Math.round((payload.y / height) * display.size.height);
+  const scaleFactor = display.scaleFactor || 1;
+  const normalizedX = clamp(
+    Number.isFinite(payload.normalizedX) ? payload.normalizedX : payload.x / Math.max(payload.width || 1, 1),
+    0,
+    1
+  );
+  const normalizedY = clamp(
+    Number.isFinite(payload.normalizedY) ? payload.normalizedY : payload.y / Math.max(payload.height || 1, 1),
+    0,
+    1
+  );
+  const x = Math.round((display.bounds.x + (normalizedX * display.bounds.width)) * scaleFactor);
+  const y = Math.round((display.bounds.y + (normalizedY * display.bounds.height)) * scaleFactor);
 
   return new Point(x, y);
 }
@@ -154,6 +176,32 @@ function isPrintableKey(key) {
 
 function isModifierKey(key) {
   return key in modifierKeyMap;
+}
+
+function getModifierKeys(payload) {
+  const modifierKeys = [];
+
+  if (payload.ctrlKey && payload.key !== "Control") {
+    modifierKeys.push(Key.LeftControl);
+  }
+
+  if (payload.altKey && payload.key !== "Alt") {
+    modifierKeys.push(Key.LeftAlt);
+  }
+
+  if (payload.shiftKey && payload.key !== "Shift") {
+    modifierKeys.push(Key.LeftShift);
+  }
+
+  if (payload.metaKey && payload.key !== "Meta") {
+    modifierKeys.push(Key.LeftSuper);
+  }
+
+  return modifierKeys;
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 module.exports = {
