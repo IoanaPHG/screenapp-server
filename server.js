@@ -5,7 +5,7 @@ const path = require("path");
 const WebSocket = require("ws");
 
 const PORT = process.env.PORT || 3001;
-const SECRET = "supersecret123";
+const SECRET = process.env.SCREENAPP_JWT_SECRET || "supersecret123";
 const INDEX_FILE = path.join(__dirname, "public", "index.html");
 const clients = {};
 const server = http.createServer((req, res) => {

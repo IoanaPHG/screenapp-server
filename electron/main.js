@@ -17,6 +17,7 @@ function createWindow() {
     minWidth: 1100,
     minHeight: 720,
     autoHideMenuBar: true,
+    fullscreenable: true,
     backgroundColor: "#f4efe6",
     webPreferences: {
       contextIsolation: true,
@@ -32,6 +33,22 @@ function createWindow() {
 
   mainWindow.webContents.on("did-finish-load", () => {
     logDesktopEvent("Desktop window ready");
+  });
+
+  mainWindow.on("enter-full-screen", () => {
+    broadcastWindowState(mainWindow);
+  });
+
+  mainWindow.on("leave-full-screen", () => {
+    broadcastWindowState(mainWindow);
+  });
+
+  mainWindow.on("maximize", () => {
+    broadcastWindowState(mainWindow);
+  });
+
+  mainWindow.on("unmaximize", () => {
+    broadcastWindowState(mainWindow);
   });
 
   mainWindow.on("closed", () => {
@@ -134,6 +151,33 @@ ipcMain.handle("remote-control:displays", async () => {
   }
 });
 
+ipcMain.handle("window:toggle-fullscreen", (event) => {
+  const targetWindow = BrowserWindow.fromWebContents(event.sender);
+
+  if (!targetWindow) {
+    return { ok: false, isFullscreen: false };
+  }
+
+  const nextState = !targetWindow.isFullScreen();
+  targetWindow.setFullScreen(nextState);
+  broadcastWindowState(targetWindow);
+
+  return { ok: true, isFullscreen: targetWindow.isFullScreen() };
+});
+
+ipcMain.handle("window:get-state", (event) => {
+  const targetWindow = BrowserWindow.fromWebContents(event.sender);
+
+  if (!targetWindow) {
+    return { isFullscreen: false, isMaximized: false };
+  }
+
+  return {
+    isFullscreen: targetWindow.isFullScreen(),
+    isMaximized: targetWindow.isMaximized()
+  };
+});
+
 app.on("window-all-closed", () => {
   stopNativeAgent();
   if (process.platform !== "darwin") {
@@ -148,5 +192,16 @@ function logDesktopEvent(message) {
     if (!windowInstance.isDestroyed()) {
       windowInstance.webContents.send("desktop-log", message);
     }
+  });
+}
+
+function broadcastWindowState(windowInstance) {
+  if (windowInstance.isDestroyed()) {
+    return;
+  }
+
+  windowInstance.webContents.send("window-state", {
+    isFullscreen: windowInstance.isFullScreen(),
+    isMaximized: windowInstance.isMaximized()
   });
 }

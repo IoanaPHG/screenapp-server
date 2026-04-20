@@ -8,7 +8,7 @@
     :root{--bg:#ebe4d7;--panel:#fffdf9;--soft:#f7f1e8;--line:#d8ccb6;--text:#1f1b16;--muted:#726558;--accent:#b45309;--success:#166534;--danger:#991b1b;--info:#1d4ed8}
     *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Tahoma,sans-serif;color:var(--text);background:linear-gradient(180deg,#efe7da,#e7dccb)}
     button,input{font:inherit}button{border:0;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer}button[disabled]{opacity:.45;cursor:not-allowed}input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px}
-    .app{min-height:100vh;display:grid;grid-template-columns:320px 1fr;gap:18px;padding:18px}.card{background:rgba(255,253,249,.94);border:1px solid var(--line);border-radius:22px;padding:18px}.side,.main{display:flex;flex-direction:column;gap:14px;min-width:0}
+    .app{min-height:100vh;display:grid;grid-template-columns:320px 1fr;gap:18px;padding:18px;transition:grid-template-columns .2s ease,padding .2s ease}.app.focusMode{grid-template-columns:1fr;padding:12px}.app.focusMode .side,.app.focusMode .logs{display:none}.card{background:rgba(255,253,249,.94);border:1px solid var(--line);border-radius:22px;padding:18px}.side,.main{display:flex;flex-direction:column;gap:14px;min-width:0}
     .brand{font-size:30px;font-weight:800}.muted{color:var(--muted);line-height:1.5}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
     .name{font-size:24px;font-weight:800}.status{margin-top:12px;padding:12px 14px;border-radius:16px;background:#eef8f0;color:var(--success);min-height:48px;display:flex;align-items:center}
     .row{display:flex;align-items:center;justify-content:space-between;gap:12px}.chip,.badge{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
@@ -16,20 +16,22 @@
     .primary{background:linear-gradient(135deg,#c96b17,var(--accent));color:#fff}.secondary{background:var(--soft);border:1px solid var(--line);color:var(--text)}.danger{background:#2f2720;color:#fff}.actions,.participants,.logs{display:grid;gap:10px}
     .participant{text-align:left;background:#fff;border:1px solid var(--line)}.participant.active{background:#fff4e8;color:#92400e}.participant strong,.participant span{display:block}.participant span{margin-top:4px;font-size:13px;font-weight:500;color:var(--muted)}
     .badge{background:#dbeafe;color:var(--info)}
-    .screen{position:relative;min-height:420px;border-radius:26px;overflow:hidden;background:#17130f}.screen video{width:100%;height:100%;min-height:420px;object-fit:contain}.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center;color:#f5e8d2;background:linear-gradient(180deg,rgba(28,22,16,.2),rgba(28,22,16,.55))}
+    .viewerHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.viewerTitle{font-size:22px;font-weight:800}.viewerActions{display:flex;gap:10px;flex-wrap:wrap}.viewerActions button{padding:10px 14px;border-radius:12px}
+    .screen{position:relative;min-height:420px;border-radius:26px;overflow:hidden;background:#17130f}.screen.fillMode video{object-fit:cover}.screen video{width:100%;height:100%;min-height:420px;object-fit:contain;background:#17130f}.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center;color:#f5e8d2;background:linear-gradient(180deg,rgba(28,22,16,.2),rgba(28,22,16,.55))}
+    .screenToolbar{position:absolute;top:16px;right:16px;display:flex;gap:10px;z-index:3;flex-wrap:wrap}.ghost{background:rgba(255,249,241,.92);color:#1f1b16;border:1px solid rgba(216,204,182,.8)}
     .overlayBar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:18px;background:rgba(20,15,11,.62);color:#fff9f1}.overlayBar strong,.overlayBar span{display:block}.overlayBar span{margin-top:4px;color:rgba(255,249,241,.78);font-size:14px}
     .logBody{min-height:140px;white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1.5}.logs{grid-template-columns:repeat(2,minmax(0,1fr))}
     .overlay{position:fixed;inset:0;background:rgba(31,27,22,.54);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.overlay.visible{display:flex}.modal{width:min(460px,100%);padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:24px}
     .modalTitle{font-size:24px;font-weight:800}.modalText{margin:10px 0 18px;color:var(--muted);line-height:1.6}.modalActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.single{grid-template-columns:1fr}.error{margin-top:10px;color:var(--danger);min-height:20px;font-size:14px}
     @media (max-width:1050px){.app{grid-template-columns:1fr}.logs{grid-template-columns:1fr}}
-    @media (max-width:720px){.app{padding:12px}.hero,.overlayBar,.row{flex-direction:column;align-items:stretch}.screen,.screen video{min-height:300px}.modalActions{grid-template-columns:1fr}}
+    @media (max-width:720px){.app{padding:12px}.hero,.overlayBar,.row,.viewerHeader{flex-direction:column;align-items:stretch}.screen,.screen video{min-height:300px}.modalActions{grid-template-columns:1fr}.screenToolbar{position:static;padding:12px 12px 0;justify-content:flex-end}}
   </style>
 </head>
 <body>
   <div id="nameOverlay" class="overlay visible"><div class="modal"><div class="modalTitle">Bine ai venit</div><div class="modalText">Introdu numele tau pentru a intra in camera comuna si a vedea participantii disponibili.</div><div class="eyebrow">Nume</div><input id="nameInput" type="text" maxlength="32" placeholder="Ex: Andrei"><div id="nameError" class="error"></div><div class="modalActions single"><button id="saveNameButton" class="primary">Intra in aplicatie</button></div></div></div>
   <div id="requestOverlay" class="overlay"><div class="modal"><div class="modalTitle">Cerere de acces</div><div id="requestMessage" class="modalText">Un participant cere acces la ecranul tau.</div><div class="modalActions"><button id="approveRequestButton" class="primary">Accepta</button><button id="denyRequestButton" class="secondary">Refuza</button></div></div></div>
 
-  <main class="app">
+  <main id="appShell" class="app">
     <aside class="side">
       <section class="card"><div class="eyebrow">Identitate</div><div id="userName" class="name">Nepornit</div><div id="status" class="status">Introdu numele tau pentru a continua.</div></section>
       <section class="card"><div class="row"><div class="eyebrow" style="margin-bottom:0">Conexiune</div><div id="connectionChip" class="chip">Offline</div></div><div class="actions"><button id="connectButton" class="primary" disabled>Conecteaza-te</button><button id="stopSessionButton" class="danger" disabled>Opreste sesiunea</button></div></section>
@@ -37,7 +39,8 @@
     </aside>
 
     <section class="main">
-      <section class="screen"><video id="screenVideo" autoplay playsinline muted></video><div id="placeholder" class="placeholder">Aici va aparea ecranul partajat dupa ce o cerere este acceptata.</div><div class="overlayBar"><div><strong id="sessionTitle">Fara sesiune activa</strong><span id="sessionMeta">Controlul remote este disponibil doar dupa acceptarea cererii.</span></div><div id="modeBadge" class="badge">Desktop</div><div id="sessionBadge" class="badge" style="background:#ede9e1;color:#57534e">In asteptare</div></div></section>
+      <section class="card viewerHeader"><div><div class="eyebrow">Viewer</div><div class="viewerTitle">Ecran remote</div></div><div class="viewerActions"><button id="fitToggleButton" class="secondary">Fill</button><button id="focusToggleButton" class="secondary">Focus Mode</button><button id="fullscreenButton" class="primary">Full Screen</button></div></section>
+      <section id="screenPanel" class="screen"><div class="screenToolbar"><button id="quickFocusButton" class="ghost">Ascunde detalii</button></div><video id="screenVideo" autoplay playsinline muted></video><div id="placeholder" class="placeholder">Aici va aparea ecranul partajat dupa ce o cerere este acceptata.</div><div class="overlayBar"><div><strong id="sessionTitle">Fara sesiune activa</strong><span id="sessionMeta">Controlul remote este disponibil doar dupa acceptarea cererii.</span></div><div id="modeBadge" class="badge">Desktop</div><div id="sessionBadge" class="badge" style="background:#ede9e1;color:#57534e">In asteptare</div></div></section>
       <section class="logs"><div class="card"><div class="eyebrow">App Log</div><div id="logs" class="logBody">Jurnalul aplicatiei va aparea aici.</div></div><div class="card"><div class="eyebrow">Control Pipeline</div><div id="controlLogs" class="logBody">Jurnalul pentru control remote va aparea aici.</div></div></section>
     </section>
   </main>
@@ -47,8 +50,8 @@
     const $=id=>document.getElementById(id);
     const isDesktopApp=Boolean(window.screenAppDesktop?.isElectronDesktop);
     const signalingBaseUrl=window.screenAppDesktop?.signalingUrl || window.location.origin;
-    const els={connectButton:$("connectButton"),stopSessionButton:$("stopSessionButton"),status:$("status"),screenVideo:$("screenVideo"),participants:$("participants"),logs:$("logs"),controlLogs:$("controlLogs"),placeholder:$("placeholder"),modeBadge:$("modeBadge"),userName:$("userName"),connectionChip:$("connectionChip"),sessionTitle:$("sessionTitle"),sessionMeta:$("sessionMeta"),sessionBadge:$("sessionBadge"),nameOverlay:$("nameOverlay"),requestOverlay:$("requestOverlay"),nameInput:$("nameInput"),nameError:$("nameError"),saveNameButton:$("saveNameButton"),requestMessage:$("requestMessage"),approveRequestButton:$("approveRequestButton"),denyRequestButton:$("denyRequestButton")};
-    let ws=null,pc=null,localStream=null,username="",targetUser="",participants=[],localShareActive=false,remoteStreamActive=false,lastMouseSentAt=0,controlTargetUser="",acceptedControllerUser="",hasControlPermission=false,pendingIncomingRequest="",pendingOutgoingRequest="",suppressNextCloseMessage=false;
+    const els={appShell:$("appShell"),screenPanel:$("screenPanel"),connectButton:$("connectButton"),stopSessionButton:$("stopSessionButton"),status:$("status"),screenVideo:$("screenVideo"),participants:$("participants"),logs:$("logs"),controlLogs:$("controlLogs"),placeholder:$("placeholder"),modeBadge:$("modeBadge"),userName:$("userName"),connectionChip:$("connectionChip"),sessionTitle:$("sessionTitle"),sessionMeta:$("sessionMeta"),sessionBadge:$("sessionBadge"),nameOverlay:$("nameOverlay"),requestOverlay:$("requestOverlay"),nameInput:$("nameInput"),nameError:$("nameError"),saveNameButton:$("saveNameButton"),requestMessage:$("requestMessage"),approveRequestButton:$("approveRequestButton"),denyRequestButton:$("denyRequestButton"),fitToggleButton:$("fitToggleButton"),focusToggleButton:$("focusToggleButton"),quickFocusButton:$("quickFocusButton"),fullscreenButton:$("fullscreenButton")};
+    let ws=null,pc=null,localStream=null,username="",targetUser="",participants=[],localShareActive=false,remoteStreamActive=false,lastMouseSentAt=0,controlTargetUser="",acceptedControllerUser="",hasControlPermission=false,pendingIncomingRequest="",pendingOutgoingRequest="",suppressNextCloseMessage=false,windowIsFullscreen=false;
 
     init();
 
@@ -56,10 +59,12 @@
       if(!isDesktopApp){els.modeBadge.textContent="Web";els.modeBadge.style.background="#fee2e2";els.modeBadge.style.color="#991b1b"}
       updateConnectionState("offline");updateSessionBadge("idle");renderParticipants();
       if(window.screenAppDesktop?.onDesktopLog){window.screenAppDesktop.onDesktopLog(message=>logControlLine("DESKTOP "+message))}
-      els.connectButton.addEventListener("click",connectToRoom);els.stopSessionButton.addEventListener("click",stopSession);els.saveNameButton.addEventListener("click",handleNameSubmit);els.approveRequestButton.addEventListener("click",approveIncomingRequest);els.denyRequestButton.addEventListener("click",denyIncomingRequest);
+      if(window.screenAppDesktop?.onWindowState){window.screenAppDesktop.onWindowState(state=>syncFullscreenButton(Boolean(state?.isFullscreen)))}
+      if(window.screenAppDesktop?.getWindowState){window.screenAppDesktop.getWindowState().then(state=>syncFullscreenButton(Boolean(state?.isFullscreen))).catch(()=>syncFullscreenButton(false))}
+      els.connectButton.addEventListener("click",connectToRoom);els.stopSessionButton.addEventListener("click",stopSession);els.saveNameButton.addEventListener("click",handleNameSubmit);els.approveRequestButton.addEventListener("click",approveIncomingRequest);els.denyRequestButton.addEventListener("click",denyIncomingRequest);els.fitToggleButton.addEventListener("click",toggleFitMode);els.focusToggleButton.addEventListener("click",toggleFocusMode);els.quickFocusButton.addEventListener("click",toggleFocusMode);els.fullscreenButton.addEventListener("click",toggleFullscreen);
       els.nameInput.addEventListener("keydown",e=>{if(e.key==="Enter")handleNameSubmit()});
       ["mousemove","mousedown","mouseup"].forEach(type=>els.screenVideo.addEventListener(type,forwardMouseEvent));
-      els.screenVideo.addEventListener("wheel",forwardScrollEvent,{passive:false});window.addEventListener("keydown",forwardKeyboardEvent);window.addEventListener("keyup",forwardKeyboardEvent);els.nameInput.focus();
+      els.screenVideo.addEventListener("wheel",forwardScrollEvent,{passive:false});els.screenVideo.addEventListener("contextmenu",event=>event.preventDefault());window.addEventListener("keydown",forwardKeyboardEvent);window.addEventListener("keyup",forwardKeyboardEvent);els.nameInput.focus();
     }
 
     function handleNameSubmit(){
@@ -82,7 +87,7 @@
         if(data.type==="participants"){participants=data.participants.filter(name=>name!==username);renderParticipants();return}
         if(data.type==="access-request"){pendingIncomingRequest=data.from;els.requestMessage.textContent=data.from+" cere acces la ecranul si controlul desktop-ului tau.";els.requestOverlay.classList.add("visible");setStatus("Ai primit o cerere de acces de la "+data.from+".");updateSessionBadge("incoming");return}
         if(data.type==="access-approved"){pendingOutgoingRequest="";targetUser=data.from;setStatus("Cererea a fost acceptata de "+data.from+". Se asteapta stream-ul.");updateSessionBadge("waiting");logControlLine("ACCESS approved by "+data.from);renderParticipants();return}
-        if(data.type==="access-denied"){pendingOutgoingRequest="";setStatus("Cererea a fost refuzata de "+data.from+".");updateSessionBadge("idle");logControlLine("ACCESS denied by "+data.from);renderParticipants();return}
+        if(data.type==="access-denied"){pendingOutgoingRequest="";targetUser="";setStatus("Cererea a fost refuzata de "+data.from+".");updateSessionBadge("idle");logControlLine("ACCESS denied by "+data.from);renderParticipants();return}
         if(data.type==="offer"){await handleOffer(data);return}
         if(data.type==="answer"){if(!pc){logControlLine("SIGNAL answer ignored because peer connection is missing");return}await pc.setRemoteDescription(new RTCSessionDescription(data.answer));setStatus("Viewer connected: "+data.from);updateSessionBadge("live");logControlLine("SIGNAL answer received from "+data.from);return}
         if(data.type==="ice"&&data.candidate){if(!pc){logControlLine("SIGNAL ice ignored because peer connection is missing");return}await pc.addIceCandidate(new RTCIceCandidate(data.candidate));logControlLine("SIGNAL ice from "+data.from);return}
@@ -145,6 +150,36 @@
       targetUser=name;pendingOutgoingRequest=name;els.sessionTitle.textContent="Cerere trimisa";els.sessionMeta.textContent="Dupa accept, sesiunea porneste direct din aplicatia celuilalt participant.";setStatus("Cererea a fost trimisa catre "+name+".");updateSessionBadge("waiting");ws.send(JSON.stringify({type:"access-request",to:name}));logControlLine("ACCESS request sent to "+name);renderParticipants();
     }
 
+    function toggleFitMode(){
+      const fillModeEnabled=els.screenPanel.classList.toggle("fillMode");
+      els.fitToggleButton.textContent=fillModeEnabled?"Fit":"Fill";
+      logLine(fillModeEnabled?"Viewer setat pe fill mode.":"Viewer setat pe fit mode.");
+    }
+
+    function toggleFocusMode(){
+      const focusModeEnabled=els.appShell.classList.toggle("focusMode");
+      els.focusToggleButton.textContent=focusModeEnabled?"Arata detalii":"Focus Mode";
+      els.quickFocusButton.textContent=focusModeEnabled?"Arata detalii":"Ascunde detalii";
+      logLine(focusModeEnabled?"Focus mode activat.":"Focus mode dezactivat.");
+    }
+
+    async function toggleFullscreen(){
+      try{
+        if(isDesktopApp&&window.screenAppDesktop?.toggleWindowFullscreen){
+          const state=await window.screenAppDesktop.toggleWindowFullscreen();
+          syncFullscreenButton(Boolean(state?.isFullscreen));
+          return;
+        }
+        if(document.fullscreenElement){
+          await document.exitFullscreen();
+          return;
+        }
+        await els.screenPanel.requestFullscreen();
+      }catch(error){
+        logLine("Fullscreen indisponibil: "+error.message);
+      }
+    }
+
     function forwardMouseEvent(event){
       if(!hasControlPermission||!controlTargetUser||!remoteStreamActive||!isConnected())return;
       if(event.type==="mousemove"&&Date.now()-lastMouseSentAt<30)return;lastMouseSentAt=Date.now();
@@ -195,6 +230,7 @@
     function updateSessionBadge(state){const map={idle:["In asteptare","#ede9e1","#57534e"],incoming:["Cerere noua","#ffedd5","#9a3412"],waiting:["Se asteapta","#dbeafe","#1d4ed8"],live:["Live","#dcfce7","#166534"],sharing:["Partajezi","#dcfce7","#166534"],control:["Control activ","#dcfce7","#166534"],"view-only":["Doar vizualizare","#fef3c7","#92400e"]};const current=map[state]||map.idle;els.sessionBadge.textContent=current[0];els.sessionBadge.style.background=current[1];els.sessionBadge.style.color=current[2]}
     function isConnected(){return ws&&ws.readyState===WebSocket.OPEN}
     function setStatus(message){els.status.textContent=message}
+    function syncFullscreenButton(isFullscreen){windowIsFullscreen=isFullscreen;els.fullscreenButton.textContent=isFullscreen?"Exit Full Screen":"Full Screen"}
     function logLine(message){const time=new Date().toLocaleTimeString();els.logs.textContent="["+time+"] "+message+"\n"+els.logs.textContent}
     function logControlLine(message){const time=new Date().toLocaleTimeString();els.controlLogs.textContent="["+time+"] "+message+"\n"+els.controlLogs.textContent}
     function escapeHtml(value){return value.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;")}
@@ -235,6 +271,12 @@
         height:rect.height
       };
     }
+
+    document.addEventListener("fullscreenchange",()=>{
+      if(!isDesktopApp){
+        syncFullscreenButton(Boolean(document.fullscreenElement));
+      }
+    });
   </script>
 </body>
 </html>
